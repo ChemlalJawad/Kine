@@ -156,4 +156,5 @@ Historique
 - Type: Added
 - Zone: Backend/Audit
 - Description: P0-008 - Journal audit append-only (Kine.Modules.Audit): AuditEvent immuable, AuditTrailService produisant une chaine de hash (prev_hash/event_hash, SHA-256), AuditChainVerifier detectant alteration/reordering, InMemoryAuditLogStore isole par tenant sans API update/delete et renvoyant un snapshot defensif. 6 tests unitaires ajoutes (chainage, isolation tenant, verification integrite, detection tampering/reorder, non-mutabilite du store).
+- Description: P0-007 - Ajout StaffMfaEnforcementMiddleware imposant un gate MFA base sur claims OIDC (amr/acr) pour toute requete staff authentifiee, sans stockage MFA local; enregistre dans le pipeline Kine.Api
 - Auteur: Agent
