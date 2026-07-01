@@ -136,7 +136,6 @@ export function AgendaPage() {
   return (
     <section className="patients-grid">
       <div className="panel">
-        <p className="eyebrow">Module Agenda</p>
         <h3>Disponibilites</h3>
         <p className="muted">Creation de creneaux praticien (tenant: {tenantId})</p>
 

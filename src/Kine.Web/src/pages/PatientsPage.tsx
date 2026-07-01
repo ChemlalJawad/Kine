@@ -207,7 +207,6 @@ export function PatientsPage() {
   return (
     <section className="patients-grid">
       <div className="panel">
-        <p className="eyebrow">Module Patients</p>
         <h3>Patients</h3>
         <p className="muted">CRUD staff minimal avec contexte tenant: {tenantId}</p>
 

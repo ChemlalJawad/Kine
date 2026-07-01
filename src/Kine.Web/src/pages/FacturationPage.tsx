@@ -53,11 +53,6 @@ const invoices: Invoice[] = [
 export function FacturationPage() {
   return (
     <section className="stack">
-      <div>
-        <p className="eyebrow">Module Facturation</p>
-        <h2 style={{ margin: '0.25rem 0 0' }}>Remboursements</h2>
-      </div>
-
       <p className="muted">
         Apercu de demonstration — le module Facturation &amp; Remboursement (INAMI) n&rsquo;est pas encore
         connecte a un backend.
