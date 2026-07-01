@@ -65,11 +65,6 @@ export function DashboardPage() {
 
   return (
     <section className="stack">
-      <div>
-        <p className="eyebrow">Vue d ensemble</p>
-        <h2 style={{ margin: '0.25rem 0 0' }}>Bonjour, {user?.displayName ?? 'staff'}</h2>
-      </div>
-
       {error ? <p className="error">{error}</p> : null}
 
       <div className="kpi-grid">
