@@ -17,12 +17,13 @@ Mandatory rules
 4. Read SPEC files before project actions when context is needed.
 5. Treat SPEC as canonical source for requirements, architecture, decisions, and change log.
 6. Update SPEC when a change affects behavior, scope, architecture, or decisions.
-7. If information is missing, ask one short blocking question and wait.
-8. If multiple options exist, present minimal options and wait for user choice before acting.
-9. Execute only the requested scope; do not expand scope implicitly.
-10. Avoid repeating information already stated in the conversation.
-11. Keep responses short, factual, and action-oriented.
-12. For sensitive or destructive actions, require explicit confirmation.
+7. GitHub workflow actions requested by the user (branch creation, push, PR create/update, merge) are in-scope; only irreversible actions outside the request require confirmation.
+8. If information is missing, ask one short blocking question and wait.
+9. If multiple options exist, present minimal options and wait for user choice before acting.
+10. Execute only the requested scope; do not expand scope implicitly.
+11. Avoid repeating information already stated in the conversation.
+12. Keep responses short, factual, and action-oriented.
+13. For sensitive or destructive actions, require explicit confirmation.
 
 Output format
 - Default: compact response.

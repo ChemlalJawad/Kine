@@ -6,7 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="3.1.0" />
+    <ProjectReference Include="..\Kine.SharedKernel\Kine.SharedKernel.csproj" />
+    <ProjectReference Include="..\Kine.Modules.Identity\Kine.Modules.Identity.csproj" />
+    <ProjectReference Include="..\Kine.Modules.Patients\Kine.Modules.Patients.csproj" />
+    <ProjectReference Include="..\Kine.Modules.Clinical\Kine.Modules.Clinical.csproj" />
+    <ProjectReference Include="..\Kine.Modules.Scheduling\Kine.Modules.Scheduling.csproj" />
+    <ProjectReference Include="..\Kine.Modules.Billing\Kine.Modules.Billing.csproj" />
+    <ProjectReference Include="..\Kine.Modules.Reimbursement\Kine.Modules.Reimbursement.csproj" />
+    <ProjectReference Include="..\Kine.Modules.Reporting\Kine.Modules.Reporting.csproj" />
+    <ProjectReference Include="..\Kine.Modules.Audit\Kine.Modules.Audit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />

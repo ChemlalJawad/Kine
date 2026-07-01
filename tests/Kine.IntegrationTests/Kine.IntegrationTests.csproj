@@ -6,15 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Kine.Api/Kine.Api.csproj" />
-    <ProjectReference Include="../../Kine.Modules.Identity/Kine.Modules.Identity.csproj" />
-    <ProjectReference Include="../../Kine.Modules.Patients/Kine.Modules.Patients.csproj" />
-    <ProjectReference Include="../../Kine.Modules.Clinical/Kine.Modules.Clinical.csproj" />
-    <ProjectReference Include="../../Kine.Modules.Scheduling/Kine.Modules.Scheduling.csproj" />
-    <ProjectReference Include="../../Kine.Modules.Billing/Kine.Modules.Billing.csproj" />
-    <ProjectReference Include="../../Kine.Modules.Reimbursement/Kine.Modules.Reimbursement.csproj" />
-    <ProjectReference Include="../../Kine.Modules.Reporting/Kine.Modules.Reporting.csproj" />
-    <ProjectReference Include="../../Kine.Modules.Audit/Kine.Modules.Audit.csproj" />
+    <ProjectReference Include="../../src/Kine.Api/Kine.Api.csproj" />
+    <ProjectReference Include="../../src/Kine.Modules.Identity/Kine.Modules.Identity.csproj" />
+    <ProjectReference Include="../../src/Kine.Modules.Patients/Kine.Modules.Patients.csproj" />
+    <ProjectReference Include="../../src/Kine.Modules.Clinical/Kine.Modules.Clinical.csproj" />
+    <ProjectReference Include="../../src/Kine.Modules.Scheduling/Kine.Modules.Scheduling.csproj" />
+    <ProjectReference Include="../../src/Kine.Modules.Billing/Kine.Modules.Billing.csproj" />
+    <ProjectReference Include="../../src/Kine.Modules.Reimbursement/Kine.Modules.Reimbursement.csproj" />
+    <ProjectReference Include="../../src/Kine.Modules.Reporting/Kine.Modules.Reporting.csproj" />
+    <ProjectReference Include="../../src/Kine.Modules.Audit/Kine.Modules.Audit.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +23,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

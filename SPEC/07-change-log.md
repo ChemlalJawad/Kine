@@ -10,6 +10,24 @@ Format
 Historique
 - Date: 2026-07-01
 - Type: Added
+- Zone: Backend
+- Description: Ajout du middleware de contexte tenant Q-INE avec rejet des requetes sans tenant
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
+- Zone: Frontend
+- Description: Initialisation frontend React TypeScript pour Q-INE avec routing et shell auth minimal
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
+- Zone: Backend
+- Description: Initialisation du backend modular monolith .NET 8 avec modules references et endpoint health
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
 - Zone: SPEC
 - Description: Creation du dossier SPEC et des fichiers de gouvernance
 - Auteur: Agent
@@ -106,6 +124,24 @@ Historique
 
 - Date: 2026-07-01
 - Type: Changed
+- Zone: Branding
+- Description: Renommage public du produit en Q-INE et alignement de la documentation principale
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Changed
+- Zone: Backend
+- Description: Activation RLS sur les tables coeur avec policies tenant_scope et tests de non-fuite cross-tenant
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Changed
 - Zone: Decisions
 - Description: Ajout D-008 pour formaliser la gouvernance Orchestrator/Dev/Analysis/Architecture et la gestion des blocages
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
+- Zone: Backend
+- Description: Implementation RBAC par cabinet (module Identity): roles AdminCabinet/Kine/Assistant/Billing et matrice de permissions minimales par module (patients, clinique, agenda, facturation, remboursement, audit, identite), couverte par tests xUnit
 - Auteur: Agent

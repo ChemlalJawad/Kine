@@ -27,14 +27,14 @@ Items initialises (Sprint-ready)
 - Description: Creer structure modules et contracts internes
 - Critere acceptance: Build passe, modules references, health endpoint actif
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-002
 - Titre: Initialiser frontend React TypeScript
 - Description: Base SPA staff cabinet avec routing et auth shell
 - Critere acceptance: App chargee, login route disponible
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-003
 - Titre: Provisionner infra dev/staging/prod
@@ -55,14 +55,14 @@ Items initialises (Sprint-ready)
 - Description: Policies SQL sur Identity/Patients et tests associes
 - Critere acceptance: tests anti-fuite cross-tenant verts
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-006
 - Titre: Implementer RBAC par cabinet
 - Description: Roles AdminCabinet/Kine/Assistant/Billing et permissions minimales
 - Critere acceptance: matrice permissions testee
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-007
 - Titre: MFA staff obligatoire

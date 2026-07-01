@@ -82,3 +82,30 @@ Decisions existantes
 - Alternatives: Coordination ad hoc sans journal central
 - Impact: Trajectoire d execution plus lisible, blocages traites plus vite, trace operationnelle unifiee
 - Statut: Accepte
+
+- ID: D-009
+- Date: 2026-07-01
+- Sujet: Nom produit
+- Decision: Le produit/app est nomme Q-INE; le nom "Kine" reste un referentiel technique/historique tant que la migration des artefacts n'est pas requise
+- Contexte: Demande utilisateur de renommer l'application
+- Alternatives: Conserver Kine comme nom public
+- Impact: Branding et documentation alignes sur Q-INE; les identifiants techniques peuvent rester inchanges a court terme
+- Statut: Accepte
+
+- ID: D-010
+- Date: 2026-07-01
+- Sujet: Modele IA pour taches complexes
+- Decision: Autoriser l usage de Claude Sonnet 5 pour les taches de developpement complexes
+- Contexte: Besoin de meilleure capacite de raisonnement sur les lots techniques difficiles
+- Alternatives: Garder le modele par defaut pour tous les lots
+- Impact: Plus de marge de qualite sur les lots complexes, sans changer la gouvernance de pilotage
+- Statut: Accepte
+
+- ID: D-011
+- Date: 2026-07-01
+- Sujet: Workflow GitHub agent
+- Decision: Autoriser les actions GitHub demandees par l utilisateur (branche, push, PR, merge) sans approval supplementaire; garder l approval uniquement pour les actions irreversibles non demandees
+- Contexte: Lever le blocage operationnel sur la livraison via branches et PR
+- Alternatives: Garder une validation manuelle pour chaque operation GitHub
+- Impact: Execution plus autonome du flux de livraison, moins de friction sur les merges et publications
+- Statut: Accepte
