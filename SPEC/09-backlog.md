@@ -41,7 +41,7 @@ Items initialises (Sprint-ready)
 - Description: Terraform pour reseau prive, DB, storage, vault
 - Critere acceptance: Plan/apply reussi sur env dev, state versionne
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-004
 - Titre: Implementer tenant context middleware

@@ -15,6 +15,12 @@ Historique
 - Auteur: Agent
 
 - Date: 2026-07-01
+- Type: Changed
+- Zone: Frontend
+- Description: P0-009 complet avec UI staff minimale Patients (list/create/update/archive, contacts, consentements) et transmission des headers tenant/actor
+- Auteur: Agent
+
+- Date: 2026-07-01
 - Type: Added
 - Zone: Frontend
 - Description: Initialisation frontend React TypeScript pour Q-INE avec routing et shell auth minimal
