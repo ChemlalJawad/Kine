@@ -244,11 +244,16 @@ export function PatientsPage() {
               className={patient.id === selectedPatientId ? 'list-item active' : 'list-item'}
               onClick={() => setSelectedPatientId(patient.id)}
             >
-              <strong>
-                {patient.firstName} {patient.lastName}
-              </strong>
-              <span className="muted">
-                {patient.status === 0 ? 'Actif' : 'Archive'} · {patient.createdBy}
+              <div>
+                <strong style={{ display: 'block' }}>
+                  {patient.firstName} {patient.lastName}
+                </strong>
+                <span className="muted compact" style={{ display: 'block' }}>
+                  {patient.createdBy}
+                </span>
+              </div>
+              <span className={patient.status === 0 ? 'badge badge-success' : 'badge badge-neutral'}>
+                {patient.status === 0 ? 'Actif' : 'Archive'}
               </span>
             </button>
           ))}
@@ -406,10 +411,12 @@ export function PatientsPage() {
                     <div>
                       <strong>{consentTypeOptions.find((item) => item.value === consent.type)?.label}</strong>
                       <p className="muted compact">
-                        {consent.granted ? 'Accord' : 'Refuse'} · revocation{' '}
-                        {consent.revokedAtUtc ? 'oui' : 'non'}
+                        revocation {consent.revokedAtUtc ? 'oui' : 'non'}
                       </p>
                     </div>
+                    <span className={consent.granted ? 'badge badge-success' : 'badge badge-neutral'}>
+                      {consent.granted ? 'Accord' : 'Refuse'}
+                    </span>
                     <button className="ghost-button" type="button" onClick={() => handleRevokeConsent(consent)}>
                       Revoquer
                     </button>
