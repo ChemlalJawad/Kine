@@ -25,7 +25,8 @@ Multi-tenant
 - Isolation logique stricte des donnees.
 
 Securite
-- Authentification forte staff.
+- Authentification staff via OIDC externe.
+- MFA obligatoire imposee par l IdP; l application refuse toute session staff sans preuve MFA.
 - Autorisation par roles.
 - Journalisation des acces et modifications.
 
@@ -37,7 +38,7 @@ Observabilite
 Architecture v1 MVP (6 mois, 10-30 cabinets)
 - Decomposition systeme (modular monolith)
 - Module API Gateway/App: endpoints HTTP, validation, contexte tenant, authn/authz.
-- Module Identite et acces: utilisateurs, roles, sessions, MFA staff.
+- Module Identite et acces: utilisateurs, roles, sessions, MFA staff via claims OIDC (pas de secret MFA local MVP).
 - Module Patients: cycle de vie patient, statut, historique metier.
 - Module Dossier clinique: notes, seances, documents metadata.
 - Module Agenda: disponibilites, rendez-vous, annulation, no-show.
@@ -64,6 +65,7 @@ Architecture v1 MVP (6 mois, 10-30 cabinets)
 
 - Modele securite par cabinet
 - Authn: staff via OIDC + MFA obligatoire.
+- Regle MVP: MFA verifiee sur le token OIDC (claim amr/acr); login staff sans MFA est refuse au middleware d auth.
 - Authz: RBAC par tenant (roles cabinet) + controles de permissions par module.
 - Isolation: scoping tenant obligatoire au niveau requete + RLS DB + verifications service.
 - Chiffrement: TLS 1.2+ en transit, AES-256 at-rest (DB, backups, objets).

@@ -6,6 +6,14 @@ using Kine.Api.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Kine.Api",
+        Version = "v1"
+    });
+});
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
