@@ -2,10 +2,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Kine.Api.Middleware;
+using Kine.Api.Modules;
+using Kine.Modules.Patients.Application;
+using Kine.Modules.Patients.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSingleton<IPatientStore, InMemoryPatientStore>();
+builder.Services.AddSingleton<PatientService>();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -23,6 +28,8 @@ app.UseSwaggerUI();
 app.UseMiddleware<TenantContextMiddleware>();
 
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
+
+app.MapPatientsEndpoints();
 
 app.Run();
 

@@ -43,6 +43,9 @@ export function AppShell() {
           <div>
             <p className="eyebrow">Connecte</p>
             <h2>{user?.displayName}</h2>
+            <p className="muted compact">
+              Tenant: {user?.tenantId} · Actor: {user?.actorId}
+            </p>
           </div>
 
           <button type="button" className="ghost-button" onClick={handleSignOut}>

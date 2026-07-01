@@ -83,7 +83,7 @@ Items initialises (Sprint-ready)
 - Description: CRUD patient, contacts, consentements
 - Critere acceptance: APIs et UI staff operationnelles
 - Priorite: P0
-- Statut: Todo
+- Statut: In progress (backend+API done; UI staff a cadrer, cf SPEC/16)
 
 - ID: P0-010
 - Titre: Module Agenda v1
