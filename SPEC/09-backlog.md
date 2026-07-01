@@ -55,7 +55,7 @@ Items initialises (Sprint-ready)
 - Description: Policies SQL sur Identity/Patients et tests associes
 - Critere acceptance: tests anti-fuite cross-tenant verts
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-006
 - Titre: Implementer RBAC par cabinet

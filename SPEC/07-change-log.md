@@ -130,6 +130,12 @@ Historique
 
 - Date: 2026-07-01
 - Type: Changed
+- Zone: Backend
+- Description: Activation RLS sur les tables coeur avec policies tenant_scope et tests de non-fuite cross-tenant
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Changed
 - Zone: Decisions
 - Description: Ajout D-008 pour formaliser la gouvernance Orchestrator/Dev/Analysis/Architecture et la gestion des blocages
 - Auteur: Agent

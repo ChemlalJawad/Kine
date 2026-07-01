@@ -27,7 +27,7 @@ Tableau taches (backlog P0)
 | P0-002 | Initialiser frontend React TypeScript | Kine Dev | Done | SPA React TS + routing /login + shell auth minimal |
 | P0-003 | Provisionner infra dev/staging/prod | Kine Dev | Blocked | Bloque par Q-B02/Q-B08/Q-B10 |
 | P0-004 | Implementer tenant context middleware | Kine Dev | In progress | Branche feature/p0-004 |
-| P0-005 | Activer RLS sur tables coeur | Kine Dev | Ready | Q-B01 ferme |
+| P0-005 | Activer RLS sur tables coeur | Kine Dev | Done | Policies SQL + tests anti-fuite cross-tenant |
 | P0-006 | Implementer RBAC par cabinet | Kine Dev | Ready | Q-B06 ferme |
 | P0-007 | MFA staff obligatoire | Kine Dev | Ready | Q-B06 ferme |
 | P0-008 | Journal audit append-only | Kine Dev | Ready | Detail preuve audit a preciser (Q-B14 non bloquant) |
@@ -49,6 +49,10 @@ Journal orchestration
 - 2026-07-01 18:55 CET - Orchestrator: branche main creee localement depuis master.
 - 2026-07-01 18:55 CET - Orchestrator: branche feature/p0-004 creee pour le lot suivant.
 - 2026-07-01 18:55 CET - Orchestrator: P0-004 lance en dev sur branche dediee.
+- 2026-07-01 18:55 CET - Orchestrator: P0-004 valide et committe; lot suivant prepare.
+- 2026-07-01 18:55 CET - Orchestrator: branche feature/p0-005 creee pour le lot RLS.
+- 2026-07-01 18:55 CET - Orchestrator: P0-005 lance en dev sur branche dediee.
+- 2026-07-01 19:00 CET - Kine Dev: P0-005 complete avec script RLS core tables et tests de verrouillage cross-tenant.
 
 Actions realisees
 - Gouvernance multi-agents activee (Orchestrator/Dev/Analysis/Architecture).
