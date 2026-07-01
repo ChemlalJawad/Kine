@@ -170,3 +170,15 @@ Historique
 - Zone: Backend/Patients
 - Description: P0-009 - Module Patients v1 (Kine.Modules.Patients): entites Patient/PatientContact/PatientConsent tenant-scopees, PatientService CRUD (creation, mise a jour, statut, historique) avec InMemoryPatientStore isole par tenant; suppression patient implementee en soft-archive (Status=Archived) pour preserver l historique tant que la conception RGPD d effacement (Q-B15, ouverte) n est pas tranchee; consentement conserve via revocation horodatee plutot que suppression. Endpoints HTTP minimalistes ajoutes sur Kine.Api (/api/patients CRUD + sous-ressources contacts/consents), scopes par tenant via TenantContextMiddleware. 13 tests unitaires (PatientService) + 5 tests d integration (endpoints, isolation cross-tenant, archivage) ajoutes. UI staff CRUD (Kine.Web) non couverte dans ce lot: aucune maquette/convention UI formulaire n existe encore dans SPEC; a cadrer dans un lot dedie.
 - Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
+- Zone: Backend/Agenda
+- Description: P0-010 - Module Agenda v1 (Kine.Modules.Scheduling): entites PractitionerSlot (disponibilite) et Appointment tenant-scopees, SchedulingService avec creation de creneau, reservation de rdv (BookAppointment consomme un slot libre), annulation (libere le slot) et no-show (statut fige, slot non libere) via InMemorySchedulingStore isole par tenant; transitions de statut plutot que suppression pour preserver l historique (SPEC/02). Endpoints HTTP ajoutes sur Kine.Api (/api/scheduling/slots, /api/scheduling/appointments + cancel/no-show), scopes par tenant via TenantContextMiddleware, reponses 404/409 explicites (slot/rdv introuvable vs transition invalide). 14 tests unitaires (SchedulingService) + 6 tests d integration (endpoints, reservation, conflit, annulation, no-show, isolation cross-tenant) ajoutes. UI staff minimale ajoutee (AgendaPage): creation de creneaux, reservation rdv a partir de la liste patients existante, annulation/no-show, en reutilisant le pattern Patients (headers tenant/actor, panels, formulaires).
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Fixed
+- Zone: Frontend
+- Description: Correction d un bug pre-existant dans PatientsPage/AgendaPage: useAuth() n exposait pas tenantId/actorId directement (uniquement via user.tenantId/user.actorId), ce qui aurait envoye des headers tenant/actor vides a l API. Les deux pages lisent desormais tenantId/actorId depuis user. Corrige a l occasion de P0-010 car necessaire au bon fonctionnement du parcours patient -> rendez-vous.
+- Auteur: Agent

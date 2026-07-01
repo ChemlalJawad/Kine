@@ -38,7 +38,9 @@ type Draft = {
 };
 
 export function PatientsPage() {
-  const { tenantId, actorId } = useAuth();
+  const { user } = useAuth();
+  const tenantId = user?.tenantId ?? '';
+  const actorId = user?.actorId ?? '';
   const auth = useMemo(() => ({ tenantId, actorId }), [tenantId, actorId]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
