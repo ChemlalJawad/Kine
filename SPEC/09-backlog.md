@@ -69,7 +69,7 @@ Items initialises (Sprint-ready)
 - Description: Forcer MFA sur tous comptes staff
 - Critere acceptance: login staff sans MFA refuse
 - Priorite: P0
-- Statut: Todo
+- Statut: Fait (gate claims OIDC amr/acr, sans stockage MFA local)
 
 - ID: P0-008
 - Titre: Journal audit append-only

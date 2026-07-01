@@ -33,6 +33,10 @@ Tableau taches (backlog P0)
 | P0-008 | Journal audit append-only | Kine Dev | In progress | Branche feature/p0-008 |
 | P0-009 | Module Patients v1 | Kine Dev | Done | Branche feature/P0-009; API + UI staff minimale, tests verts |
 | P0-010 | Module Agenda v1 | Kine Dev | Done | Branche feature/P0-010; API + UI staff minimale, tests verts |
+| P0-007 | MFA staff obligatoire | Kine Dev | In progress | Branche feature/p0-007, Swagger API demande |
+| P0-008 | Journal audit append-only | Kine Dev | Ready | Detail preuve audit a preciser (Q-B14 non bloquant) |
+| P0-009 | Module Patients v1 | Kine Dev | Blocked | Impact Q-B04/Q-B15 |
+| P0-010 | Module Agenda v1 | Kine Dev | Ready-with-dependency | Critere e2e depend de P0-009 |
 
 Journal orchestration
 - 2026-07-01 16:56 CET - Orchestrator: prise en charge du pilotage projet.
@@ -59,6 +63,8 @@ Journal orchestration
 - 2026-07-01 20:09 CET - Kine Dev: P0-009 backend complete (Domain/Application/Infrastructure + endpoints HTTP tenant-scopes + 18 tests verts); UI staff CRUD non traitee, aucune convention/maquette UI formulaire dans SPEC (a cadrer separement).
 - 2026-07-01 20:22 CET - Orchestrator: P0-009 UI staff minimale demandee pour completion du lot.
 - 2026-07-01 20:28 CET - Kine Dev: P0-010 complete (Kine.Modules.Scheduling: slots/rdv/annulation/no-show, 14 tests unitaires + 6 tests integration verts) + UI staff Agenda minimale reutilisant patientsApi; correction bug pre-existant tenantId/actorId dans useAuth() (Patients+Agenda).
+- 2026-07-01 19:30 CET - Orchestrator: branche feature/p0-007 creee pour le lot MFA.
+- 2026-07-01 19:30 CET - Orchestrator: P0-007 lance en dev avec demande Swagger API.
 
 Actions realisees
 - Gouvernance multi-agents activee (Orchestrator/Dev/Analysis/Architecture).
