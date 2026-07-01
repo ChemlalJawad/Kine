@@ -1,0 +1,116 @@
+using System;
+using System.Collections.Generic;
+using Kine.Modules.Scheduling.Application;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+
+namespace Kine.Api.Modules;
+
+/// <summary>
+/// Minimal HTTP surface for the Scheduling module: slots (disponibilites), rdv,
+/// annulation, no-show. Tenant id is read from the request context (set by
+/// TenantContextMiddleware); requests reaching here are already tenant-scoped.
+/// </summary>
+public static class SchedulingEndpoints
+{
+    private const string TenantItemKey = "TenantId";
+    private const string ActorHeaderName = "X-Actor-Id";
+    private const string DefaultActor = "system";
+
+    public static void MapSchedulingEndpoints(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/scheduling");
+
+        group.MapPost("/slots", (CreateSlotRequest request, SchedulingService service, HttpContext context) =>
+        {
+            try
+            {
+                var slot = service.CreateSlot(Tenant(context), request.PractitionerId, request.StartAtUtc, request.EndAtUtc, Actor(context));
+                return Results.Created($"/api/scheduling/slots/{slot.Id}", slot);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        });
+
+        group.MapGet("/slots", (SchedulingService service, HttpContext context) =>
+        {
+            return Results.Ok(service.ListSlots(Tenant(context)));
+        });
+
+        group.MapPost("/appointments", (BookAppointmentRequest request, SchedulingService service, HttpContext context) =>
+        {
+            try
+            {
+                var appointment = service.BookAppointment(Tenant(context), request.SlotId, request.PatientId, Actor(context));
+                return Results.Created($"/api/scheduling/appointments/{appointment.Id}", appointment);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+            catch (KeyNotFoundException)
+            {
+                return Results.NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Conflict(new { error = ex.Message });
+            }
+        });
+
+        group.MapGet("/appointments", (SchedulingService service, HttpContext context) =>
+        {
+            return Results.Ok(service.ListAppointments(Tenant(context)));
+        });
+
+        group.MapGet("/appointments/{id:guid}", (Guid id, SchedulingService service, HttpContext context) =>
+        {
+            var appointment = service.GetAppointment(Tenant(context), id);
+            return appointment is null ? Results.NotFound() : Results.Ok(appointment);
+        });
+
+        group.MapPost("/appointments/{id:guid}/cancel", (Guid id, SchedulingService service, HttpContext context) =>
+        {
+            try
+            {
+                var appointment = service.CancelAppointment(Tenant(context), id);
+                return Results.Ok(appointment);
+            }
+            catch (KeyNotFoundException)
+            {
+                return Results.NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Conflict(new { error = ex.Message });
+            }
+        });
+
+        group.MapPost("/appointments/{id:guid}/no-show", (Guid id, SchedulingService service, HttpContext context) =>
+        {
+            try
+            {
+                var appointment = service.MarkNoShow(Tenant(context), id);
+                return Results.Ok(appointment);
+            }
+            catch (KeyNotFoundException)
+            {
+                return Results.NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Conflict(new { error = ex.Message });
+            }
+        });
+    }
+
+    private static string Tenant(HttpContext context) => (string)context.Items[TenantItemKey]!;
+
+    private static string Actor(HttpContext context) =>
+        context.Request.Headers.TryGetValue(ActorHeaderName, out var actor) && !string.IsNullOrWhiteSpace(actor)
+            ? actor.ToString()
+            : DefaultActor;
+}
