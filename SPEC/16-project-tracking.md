@@ -28,7 +28,7 @@ Tableau taches (backlog P0)
 | P0-003 | Provisionner infra dev/staging/prod | Kine Dev | Blocked | Bloque par Q-B02/Q-B08/Q-B10 |
 | P0-004 | Implementer tenant context middleware | Kine Dev | In progress | Branche feature/p0-004 |
 | P0-005 | Activer RLS sur tables coeur | Kine Dev | Done | Policies SQL + tests anti-fuite cross-tenant |
-| P0-006 | Implementer RBAC par cabinet | Kine Dev | In progress | Branche p0-006-feature |
+| P0-006 | Implementer RBAC par cabinet | Kine Dev | Done | Matrice roles/permissions (module Identity) + tests xUnit |
 | P0-007 | MFA staff obligatoire | Kine Dev | Ready | Q-B06 ferme |
 | P0-008 | Journal audit append-only | Kine Dev | Ready | Detail preuve audit a preciser (Q-B14 non bloquant) |
 | P0-009 | Module Patients v1 | Kine Dev | Blocked | Impact Q-B04/Q-B15 |
@@ -55,6 +55,9 @@ Journal orchestration
 - 2026-07-01 19:00 CET - Kine Dev: P0-005 complete avec script RLS core tables et tests de verrouillage cross-tenant.
 - 2026-07-01 19:00 CET - Orchestrator: branche p0-006-feature creee pour le lot RBAC.
 - 2026-07-01 19:00 CET - Orchestrator: P0-006 lance en dev sur branche dediee.
+- 2026-07-01 19:12 CET - User: autorisation de Claude Sonnet 5 pour les taches de developpement complexes.
+- 2026-07-01 19:15 CET - User: workflow GitHub agent autorise pour branches, pushes, PR et merges.
+- 2026-07-01 19:20 CET - Kine Dev: P0-006 complete avec matrice RBAC (AdminCabinet/Kine/Assistant/Billing) et tests de couverture par role.
 
 Actions realisees
 - Gouvernance multi-agents activee (Orchestrator/Dev/Analysis/Architecture).

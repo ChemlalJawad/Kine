@@ -139,3 +139,9 @@ Historique
 - Zone: Decisions
 - Description: Ajout D-008 pour formaliser la gouvernance Orchestrator/Dev/Analysis/Architecture et la gestion des blocages
 - Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
+- Zone: Backend
+- Description: Implementation RBAC par cabinet (module Identity): roles AdminCabinet/Kine/Assistant/Billing et matrice de permissions minimales par module (patients, clinique, agenda, facturation, remboursement, audit, identite), couverte par tests xUnit
+- Auteur: Agent

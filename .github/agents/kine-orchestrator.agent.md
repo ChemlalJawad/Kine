@@ -12,6 +12,7 @@ Mission
 - Route each task to the correct specialist agent.
 - Enforce strict execution rules and SPEC-first policy.
 - Keep outputs minimal and actionable.
+- Handle GitHub workflow steps requested by the user directly when needed (branch, push, PR, merge).
 
 Constraints
 - DO NOT design or implement directly when a specialist is better suited.

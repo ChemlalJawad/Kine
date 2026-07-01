@@ -13,6 +13,7 @@ The SPEC folder is the primary source of truth for project context.
 2. Use SPEC as the canonical reference for requirements, architecture, decisions, and change history.
 3. If a requested change impacts scope, architecture, or behavior, update SPEC in the same task.
 4. If information is missing, add it to SPEC open questions instead of inventing assumptions.
+5. GitHub workflow actions requested by the user (branch creation, push, PR create/update, merge) are in-scope; only irreversible actions outside the request require confirmation.
 
 ## Hard rules
 1. No autonomous decision on product, architecture, scope, or priorities without user approval.

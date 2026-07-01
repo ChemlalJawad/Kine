@@ -62,7 +62,7 @@ Items initialises (Sprint-ready)
 - Description: Roles AdminCabinet/Kine/Assistant/Billing et permissions minimales
 - Critere acceptance: matrice permissions testee
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-007
 - Titre: MFA staff obligatoire
