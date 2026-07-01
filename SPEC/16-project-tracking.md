@@ -12,6 +12,10 @@ Routage agents
 - Kine Analysis: analyse exigences/risques/compliance.
 - Kine Architecture: arbitrage technique et decisions architecture.
 
+Flux branches
+- Base cible: main
+- Une branche par lot de livraison
+
 Regle d execution
 - Dev execute les taches de developpement.
 - Si contrainte technique/compliance bloque Dev, Analysis + Architecture produisent une solution executable pour reprise Dev.
@@ -22,7 +26,7 @@ Tableau taches (backlog P0)
 | P0-001 | Initialiser backend modular monolith .NET 8 | Kine Dev | Done | Demarrage autorisable |
 | P0-002 | Initialiser frontend React TypeScript | Kine Dev | Done | SPA React TS + routing /login + shell auth minimal |
 | P0-003 | Provisionner infra dev/staging/prod | Kine Dev | Blocked | Bloque par Q-B02/Q-B08/Q-B10 |
-| P0-004 | Implementer tenant context middleware | Kine Dev | Ready | Q-B01 ferme |
+| P0-004 | Implementer tenant context middleware | Kine Dev | In progress | Branche feature/p0-004 |
 | P0-005 | Activer RLS sur tables coeur | Kine Dev | Ready | Q-B01 ferme |
 | P0-006 | Implementer RBAC par cabinet | Kine Dev | Ready | Q-B06 ferme |
 | P0-007 | MFA staff obligatoire | Kine Dev | Ready | Q-B06 ferme |
@@ -42,6 +46,9 @@ Journal orchestration
 - 2026-07-01 17:28 CET - Orchestrator: PR demandee, blocage outil GitHub MCP non disponible.
 - 2026-07-01 17:28 CET - Orchestrator: lancement du lot dev P0-002.
 - 2026-07-01 17:30 CET - Kine Dev: frontend React TypeScript initialise (routing /login, shell auth minimal, build Vite).
+- 2026-07-01 18:55 CET - Orchestrator: branche main creee localement depuis master.
+- 2026-07-01 18:55 CET - Orchestrator: branche feature/p0-004 creee pour le lot suivant.
+- 2026-07-01 18:55 CET - Orchestrator: P0-004 lance en dev sur branche dediee.
 
 Actions realisees
 - Gouvernance multi-agents activee (Orchestrator/Dev/Analysis/Architecture).
