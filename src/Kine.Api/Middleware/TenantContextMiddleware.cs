@@ -20,6 +20,12 @@ public sealed class TenantContextMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        if (ShouldSkipTenantRequirement(context.Request.Path))
+        {
+            await _next(context);
+            return;
+        }
+
         var tenantId = context.User.FindFirstValue(TenantClaimType);
 
         if (string.IsNullOrWhiteSpace(tenantId) &&
@@ -37,5 +43,12 @@ public sealed class TenantContextMiddleware
 
         context.Items[TenantItemKey] = tenantId.Trim();
         await _next(context);
+    }
+
+    private static bool ShouldSkipTenantRequirement(PathString path)
+    {
+        return path == "/"
+            || path == "/health"
+            || path.StartsWithSegments("/swagger");
     }
 }

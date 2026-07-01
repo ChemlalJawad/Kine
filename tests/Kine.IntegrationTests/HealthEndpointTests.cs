@@ -8,14 +8,17 @@ namespace Kine.IntegrationTests;
 public class HealthEndpointTests
 {
     [Fact]
-    public async Task Health_endpoint_returns_bad_request_without_tenant()
+    public async Task Health_endpoint_returns_healthy_status_without_tenant()
     {
         await using var factory = new WebApplicationFactory<Program>();
         using var client = factory.CreateClient();
 
         using var response = await client.GetAsync("/health");
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Healthy", body);
     }
 
     [Fact]
