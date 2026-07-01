@@ -58,6 +58,7 @@ Journal orchestration
 - 2026-07-01 19:12 CET - User: autorisation de Claude Sonnet 5 pour les taches de developpement complexes.
 - 2026-07-01 19:15 CET - User: workflow GitHub agent autorise pour branches, pushes, PR et merges.
 - 2026-07-01 19:20 CET - Kine Dev: P0-006 complete avec matrice RBAC (AdminCabinet/Kine/Assistant/Billing) et tests de couverture par role.
+- 2026-07-01 19:20 CET - Kine Dev: commit 98aad10 pousse sur p0-006-feature; creation PR bloquee (pas de gh CLI/token GitHub dans l environnement), meme blocage que P0-001.
 
 Actions realisees
 - Gouvernance multi-agents activee (Orchestrator/Dev/Analysis/Architecture).
