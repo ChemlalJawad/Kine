@@ -10,6 +10,12 @@ Format
 Historique
 - Date: 2026-07-01
 - Type: Added
+- Zone: Backend
+- Description: Ajout du middleware de contexte tenant Q-INE avec rejet des requetes sans tenant
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
 - Zone: Frontend
 - Description: Initialisation frontend React TypeScript pour Q-INE avec routing et shell auth minimal
 - Auteur: Agent
