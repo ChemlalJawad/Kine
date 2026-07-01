@@ -34,7 +34,7 @@ Items initialises (Sprint-ready)
 - Description: Base SPA staff cabinet avec routing et auth shell
 - Critere acceptance: App chargee, login route disponible
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-003
 - Titre: Provisionner infra dev/staging/prod

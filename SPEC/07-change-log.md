@@ -10,6 +10,12 @@ Format
 Historique
 - Date: 2026-07-01
 - Type: Added
+- Zone: Frontend
+- Description: Initialisation frontend React TypeScript pour Q-INE avec routing et shell auth minimal
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
 - Zone: Backend
 - Description: Initialisation du backend modular monolith .NET 8 avec modules references et endpoint health
 - Auteur: Agent

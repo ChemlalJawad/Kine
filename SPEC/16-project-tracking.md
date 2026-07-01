@@ -20,7 +20,7 @@ Tableau taches (backlog P0)
 | ID | Tache | Agent principal | Statut | Notes |
 | --- | --- | --- | --- | --- |
 | P0-001 | Initialiser backend modular monolith .NET 8 | Kine Dev | Done | Demarrage autorisable |
-| P0-002 | Initialiser frontend React TypeScript | Kine Dev | Ready | Demarrage autorisable |
+| P0-002 | Initialiser frontend React TypeScript | Kine Dev | Done | SPA React TS + routing /login + shell auth minimal |
 | P0-003 | Provisionner infra dev/staging/prod | Kine Dev | Blocked | Bloque par Q-B02/Q-B08/Q-B10 |
 | P0-004 | Implementer tenant context middleware | Kine Dev | Ready | Q-B01 ferme |
 | P0-005 | Activer RLS sur tables coeur | Kine Dev | Ready | Q-B01 ferme |
@@ -38,6 +38,10 @@ Journal orchestration
 - 2026-07-01 17:00 CET - Kine Dev: ordre d execution technique valide pour lot ready.
 - 2026-07-01 17:09 CET - User: renommage de l application en Q-INE.
 - 2026-07-01 17:09 CET - Orchestrator: lancement du premier lot dev P0-001.
+- 2026-07-01 17:28 CET - Orchestrator: commit du lot P0-001 realise (24fa4b457899d2144148cabab479c6b38be243ca).
+- 2026-07-01 17:28 CET - Orchestrator: PR demandee, blocage outil GitHub MCP non disponible.
+- 2026-07-01 17:28 CET - Orchestrator: lancement du lot dev P0-002.
+- 2026-07-01 17:30 CET - Kine Dev: frontend React TypeScript initialise (routing /login, shell auth minimal, build Vite).
 
 Actions realisees
 - Gouvernance multi-agents activee (Orchestrator/Dev/Analysis/Architecture).
