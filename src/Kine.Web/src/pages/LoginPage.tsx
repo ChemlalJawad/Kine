@@ -12,6 +12,8 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('staff@q-ine.local');
   const [password, setPassword] = useState('');
+  const [tenantId, setTenantId] = useState('tenant-demo');
+  const [actorId, setActorId] = useState('staff-1');
 
   const state = location.state as LocationState | null;
   const from = state?.from ?? '/app';
@@ -22,7 +24,7 @@ export function LoginPage() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    signIn(email, password);
+    signIn(email, password, tenantId, actorId);
     navigate(from, { replace: true });
   };
 
@@ -46,6 +48,16 @@ export function LoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               type="password"
             />
+          </label>
+
+          <label>
+            Tenant ID
+            <input value={tenantId} onChange={(event) => setTenantId(event.target.value)} />
+          </label>
+
+          <label>
+            Actor ID
+            <input value={actorId} onChange={(event) => setActorId(event.target.value)} />
           </label>
 
           <button type="submit" className="primary-button">

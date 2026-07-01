@@ -15,6 +15,12 @@ Historique
 - Auteur: Agent
 
 - Date: 2026-07-01
+- Type: Changed
+- Zone: Frontend
+- Description: P0-009 complet avec UI staff minimale Patients (list/create/update/archive, contacts, consentements) et transmission des headers tenant/actor
+- Auteur: Agent
+
+- Date: 2026-07-01
 - Type: Added
 - Zone: Frontend
 - Description: Initialisation frontend React TypeScript pour Q-INE avec routing et shell auth minimal
@@ -157,4 +163,10 @@ Historique
 - Zone: Backend/Audit
 - Description: P0-008 - Journal audit append-only (Kine.Modules.Audit): AuditEvent immuable, AuditTrailService produisant une chaine de hash (prev_hash/event_hash, SHA-256), AuditChainVerifier detectant alteration/reordering, InMemoryAuditLogStore isole par tenant sans API update/delete et renvoyant un snapshot defensif. 6 tests unitaires ajoutes (chainage, isolation tenant, verification integrite, detection tampering/reorder, non-mutabilite du store).
 - Description: P0-007 - Ajout StaffMfaEnforcementMiddleware imposant un gate MFA base sur claims OIDC (amr/acr) pour toute requete staff authentifiee, sans stockage MFA local; enregistre dans le pipeline Kine.Api
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
+- Zone: Backend/Patients
+- Description: P0-009 - Module Patients v1 (Kine.Modules.Patients): entites Patient/PatientContact/PatientConsent tenant-scopees, PatientService CRUD (creation, mise a jour, statut, historique) avec InMemoryPatientStore isole par tenant; suppression patient implementee en soft-archive (Status=Archived) pour preserver l historique tant que la conception RGPD d effacement (Q-B15, ouverte) n est pas tranchee; consentement conserve via revocation horodatee plutot que suppression. Endpoints HTTP minimalistes ajoutes sur Kine.Api (/api/patients CRUD + sous-ressources contacts/consents), scopes par tenant via TenantContextMiddleware. 13 tests unitaires (PatientService) + 5 tests d integration (endpoints, isolation cross-tenant, archivage) ajoutes. UI staff CRUD (Kine.Web) non couverte dans ce lot: aucune maquette/convention UI formulaire n existe encore dans SPEC; a cadrer dans un lot dedie.
 - Auteur: Agent

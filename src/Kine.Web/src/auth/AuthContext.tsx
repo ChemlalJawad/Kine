@@ -4,12 +4,14 @@ type AuthUser = {
   email: string;
   displayName: string;
   role: string;
+  tenantId: string;
+  actorId: string;
 };
 
 type AuthContextValue = {
   isAuthenticated: boolean;
   user: AuthUser | null;
-  signIn: (email: string, password: string) => void;
+  signIn: (email: string, password: string, tenantId: string, actorId: string) => void;
   signOut: () => void;
 };
 
@@ -51,13 +53,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.localStorage.removeItem(storageKey);
   }, [user]);
 
-  const signIn = useCallback((email: string) => {
+  const signIn = useCallback((email: string, _password: string, tenantId: string, actorId: string) => {
     const normalizedEmail = email.trim() || 'staff@q-ine.local';
+    const normalizedTenantId = tenantId.trim() || 'tenant-demo';
+    const normalizedActorId = actorId.trim() || 'staff-1';
 
     setUser({
       email: normalizedEmail,
       displayName: 'Staff cabinet',
-      role: 'Acces demo'
+      role: 'Acces demo',
+      tenantId: normalizedTenantId,
+      actorId: normalizedActorId
     });
   }, []);
 

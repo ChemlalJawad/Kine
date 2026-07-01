@@ -100,3 +100,12 @@ Decisions existantes
 - Alternatives: 1) MFA locale TOTP/SMS 2) MFA mixte local + IdP
 - Impact: Delta minimal, KISS, implementation rapide; dependance explicite a l IdP et absence de porte de secours locale au MVP
 - Statut: Accepte
+
+- ID: D-011
+- Date: 2026-07-01
+- Sujet: Suppression patient (P0-009)
+- Decision: Le DELETE patient est un soft-archive (Status=Archived); aucune suppression physique n est effectuee; le consentement se revoque (horodatage) sans suppression de l enregistrement
+- Contexte: Critere "historique" (SPEC/02) et question RGPD Q-B15 (effacement) encore ouverte; eviter de coder un comportement destructif incompatible avec une decision DPO/Legal a venir
+- Alternatives: 1) Suppression physique immediate 2) Attendre resolution Q-B15 avant tout DELETE
+- Impact: Implementation reversible et non bloquante; le comportement pourra etre ajuste une fois Q-B15 tranchee sans casser le contrat API (semantique DELETE inchangee cote appelant)
+- Statut: Accepte
