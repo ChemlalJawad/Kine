@@ -3,6 +3,9 @@
 Date de demarrage
 - 2026-07-01
 
+Nom produit
+- Q-INE
+
 Routage agents
 - Orchestrator: coordination globale, suivi, reporting utilisateur.
 - Kine Dev: implementation et validations techniques.
@@ -16,7 +19,7 @@ Regle d execution
 Tableau taches (backlog P0)
 | ID | Tache | Agent principal | Statut | Notes |
 | --- | --- | --- | --- | --- |
-| P0-001 | Initialiser backend modular monolith .NET 8 | Kine Dev | Ready | Demarrage autorisable |
+| P0-001 | Initialiser backend modular monolith .NET 8 | Kine Dev | Done | Demarrage autorisable |
 | P0-002 | Initialiser frontend React TypeScript | Kine Dev | Ready | Demarrage autorisable |
 | P0-003 | Provisionner infra dev/staging/prod | Kine Dev | Blocked | Bloque par Q-B02/Q-B08/Q-B10 |
 | P0-004 | Implementer tenant context middleware | Kine Dev | Ready | Q-B01 ferme |
@@ -33,11 +36,14 @@ Journal orchestration
 - 2026-07-01 16:58 CET - Kine Analysis: qualification des items P0 ready vs blocked.
 - 2026-07-01 16:59 CET - Kine Architecture: delta minimal "build-now / activate-later" via capability gates + stubs.
 - 2026-07-01 17:00 CET - Kine Dev: ordre d execution technique valide pour lot ready.
+- 2026-07-01 17:09 CET - User: renommage de l application en Q-INE.
+- 2026-07-01 17:09 CET - Orchestrator: lancement du premier lot dev P0-001.
 
 Actions realisees
 - Gouvernance multi-agents activee (Orchestrator/Dev/Analysis/Architecture).
 - Repartition initiale des taches P0 et statuts d avancement initialises.
 - Log central de pilotage cree pour suivi continu.
+- Nom public de l application fixe a Q-INE.
 
 Points en attente utilisateur
 - Validation lot de demarrage: P0-001/002/004/005/006/007/008/010.

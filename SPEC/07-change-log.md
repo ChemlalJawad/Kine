@@ -10,6 +10,12 @@ Format
 Historique
 - Date: 2026-07-01
 - Type: Added
+- Zone: Backend
+- Description: Initialisation du backend modular monolith .NET 8 avec modules references et endpoint health
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
 - Zone: SPEC
 - Description: Creation du dossier SPEC et des fichiers de gouvernance
 - Auteur: Agent
@@ -102,6 +108,12 @@ Historique
 - Type: Added
 - Zone: Pilotage
 - Description: Creation de SPEC/16-project-tracking.md pour repartition multi-agents, statuts des taches P0 et journal orchestration
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Changed
+- Zone: Branding
+- Description: Renommage public du produit en Q-INE et alignement de la documentation principale
 - Auteur: Agent
 
 - Date: 2026-07-01

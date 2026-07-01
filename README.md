@@ -1,4 +1,4 @@
-# Kine - SaaS Platform
+# Q-INE - SaaS Platform
 
 Plateforme SaaS pour kinésithérapeutes en Belgique.
 

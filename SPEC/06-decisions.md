@@ -82,3 +82,12 @@ Decisions existantes
 - Alternatives: Coordination ad hoc sans journal central
 - Impact: Trajectoire d execution plus lisible, blocages traites plus vite, trace operationnelle unifiee
 - Statut: Accepte
+
+- ID: D-009
+- Date: 2026-07-01
+- Sujet: Nom produit
+- Decision: Le produit/app est nomme Q-INE; le nom "Kine" reste un referentiel technique/historique tant que la migration des artefacts n'est pas requise
+- Contexte: Demande utilisateur de renommer l'application
+- Alternatives: Conserver Kine comme nom public
+- Impact: Branding et documentation alignes sur Q-INE; les identifiants techniques peuvent rester inchanges a court terme
+- Statut: Accepte

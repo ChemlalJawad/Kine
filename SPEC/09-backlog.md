@@ -27,7 +27,7 @@ Items initialises (Sprint-ready)
 - Description: Creer structure modules et contracts internes
 - Critere acceptance: Build passe, modules references, health endpoint actif
 - Priorite: P0
-- Statut: Todo
+- Statut: Done
 
 - ID: P0-002
 - Titre: Initialiser frontend React TypeScript
