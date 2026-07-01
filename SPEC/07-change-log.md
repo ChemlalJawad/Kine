@@ -139,3 +139,9 @@ Historique
 - Zone: Decisions
 - Description: Ajout D-008 pour formaliser la gouvernance Orchestrator/Dev/Analysis/Architecture et la gestion des blocages
 - Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
+- Zone: Backend
+- Description: P0-007 - Ajout StaffMfaEnforcementMiddleware imposant un gate MFA base sur claims OIDC (amr/acr) pour toute requete staff authentifiee, sans stockage MFA local; enregistre dans le pipeline Kine.Api
+- Auteur: Agent
