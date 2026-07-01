@@ -2,9 +2,10 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 const navItems = [
-  { to: '/app', label: 'Accueil', end: true },
+  { to: '/app', label: 'Tableau de bord', end: true },
+  { to: '/app/agenda', label: 'Agenda' },
   { to: '/app/patients', label: 'Patients' },
-  { to: '/app/agenda', label: 'Agenda' }
+  { to: '/app/facturation', label: 'Facturation' }
 ];
 
 export function AppShell() {

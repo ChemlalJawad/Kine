@@ -19,6 +19,13 @@ const statusLabels: Record<number, string> = {
   3: 'Termine'
 };
 
+const statusBadgeClass: Record<number, string> = {
+  0: 'badge badge-success',
+  1: 'badge badge-danger',
+  2: 'badge badge-warning',
+  3: 'badge badge-neutral'
+};
+
 type SlotDraft = {
   practitionerId: string;
   startAtUtc: string;
@@ -170,9 +177,12 @@ export function AgendaPage() {
               <div>
                 <strong>{slot.practitionerId}</strong>
                 <p className="muted compact">
-                  {slot.startAtUtc} → {slot.endAtUtc} · {slot.isBooked ? 'reserve' : 'libre'}
+                  {slot.startAtUtc} → {slot.endAtUtc}
                 </p>
               </div>
+              <span className={slot.isBooked ? 'badge badge-warning' : 'badge badge-success'}>
+                {slot.isBooked ? 'Reserve' : 'Libre'}
+              </span>
             </div>
           ))}
         </div>
@@ -225,9 +235,10 @@ export function AgendaPage() {
               <div>
                 <strong>{patientName(appointment.patientId)}</strong>
                 <p className="muted compact">
-                  {appointment.practitionerId} · {appointment.startAtUtc} · {statusLabels[appointment.status]}
+                  {appointment.practitionerId} · {appointment.startAtUtc}
                 </p>
               </div>
+              <span className={statusBadgeClass[appointment.status]}>{statusLabels[appointment.status]}</span>
               {appointment.status === 0 ? (
                 <div className="toolbar">
                   <button className="ghost-button" type="button" onClick={() => handleCancel(appointment)}>

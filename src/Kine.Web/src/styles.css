@@ -1,10 +1,10 @@
 :root {
   color-scheme: light;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #0f172a;
-  background: #f8fafc;
+  color: #3b332a;
+  background: #faf6ee;
 }
 
 * {
@@ -36,11 +36,12 @@ button {
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #0f766e;
+  color: #3f6f5b;
+  font-weight: 700;
 }
 
 .muted {
-  color: #475569;
+  color: #8a8378;
 }
 
 .compact {
@@ -59,31 +60,35 @@ button {
   justify-content: space-between;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: #fbf6ee;
+  color: #3b332a;
+  border-right: 1px solid #ece0cf;
 }
 
 .brand {
   margin: 0.25rem 0 0;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
+  color: #3b332a;
+  font-weight: 800;
 }
 
 .nav {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .nav-link {
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  color: inherit;
+  padding: 0.7rem 1rem;
+  border-radius: 0.9rem;
+  color: #6b6252;
   text-decoration: none;
-  background: rgba(148, 163, 184, 0.08);
+  font-weight: 600;
+  background: transparent;
 }
 
 .nav-link.active {
-  background: #0f766e;
-  color: #f8fafc;
+  background: #3f6f5b;
+  color: #fffdf9;
 }
 
 .workspace {
@@ -98,22 +103,24 @@ button {
   gap: 1rem;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: #fffdf9;
+  border-bottom: 1px solid #ece0cf;
 }
 
 .content {
   padding: 2rem;
+  background: #faf6ee;
+  flex: 1;
 }
 
 .panel,
 .login-card {
   max-width: 720px;
   padding: 1.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  border: 1px solid #ece0cf;
+  border-radius: 1.25rem;
+  background: #fffdf9;
+  box-shadow: 0 4px 16px rgba(120, 90, 50, 0.06);
 }
 
 .stack {
@@ -139,8 +146,10 @@ button {
 .stack input,
 .stack select {
   padding: 0.75rem 0.875rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.75rem;
+  border: 1px solid #ece0cf;
+  border-radius: 0.9rem;
+  background: #fffdf9;
+  color: #3b332a;
 }
 
 .toolbar {
@@ -159,7 +168,7 @@ button {
   display: grid;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #ece0cf;
 }
 
 .list {
@@ -173,9 +182,9 @@ button {
   gap: 1rem;
   align-items: center;
   padding: 0.9rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.9rem;
-  background: #f8fafc;
+  border: 1px solid #ece0cf;
+  border-radius: 1rem;
+  background: #faf6ee;
   text-align: left;
 }
 
@@ -184,8 +193,8 @@ button.list-item {
 }
 
 button.list-item.active {
-  border-color: #0f766e;
-  background: rgba(15, 118, 110, 0.08);
+  border-color: #3f6f5b;
+  background: rgba(63, 111, 91, 0.08);
 }
 
 .inline-check {
@@ -196,16 +205,105 @@ button.list-item.active {
 
 .success {
   margin: 0;
-  color: #166534;
+  color: #3f6f5b;
 }
 
 .error {
   margin: 0;
-  color: #b91c1c;
+  color: #b3441f;
 }
 
 .status-panel {
   align-self: start;
+}
+
+/* KPI cards on the dashboard */
+.kpi-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.kpi-card {
+  padding: 1.1rem 1.25rem;
+  border: 1px solid #ece0cf;
+  border-radius: 1.25rem;
+  background: #fffdf9;
+  box-shadow: 0 4px 16px rgba(120, 90, 50, 0.06);
+}
+
+.kpi-card .kpi-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8a8378;
+}
+
+.kpi-card .kpi-value {
+  margin: 0.5rem 0 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #3b332a;
+}
+
+/* status badges (agenda / consents / invoices) */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: #e6efe9;
+  color: #3f6f5b;
+}
+
+.badge-warning {
+  background: #f7e6d8;
+  color: #c2703d;
+}
+
+.badge-danger {
+  background: #f5ded4;
+  color: #b3441f;
+}
+
+.badge-neutral {
+  background: #f0ece4;
+  color: #8a8378;
+}
+
+/* invoices table (facturation) */
+.invoice-table {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.invoice-row {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr 1.6fr 0.7fr 1fr 0.8fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #ece0cf;
+  border-radius: 1rem;
+  background: #faf6ee;
+  font-size: 0.85rem;
+  color: #3b332a;
+}
+
+.invoice-header {
+  border: 0;
+  background: transparent;
+  padding: 0 0.9rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ab9f8c;
 }
 
 .login-screen {
@@ -213,6 +311,7 @@ button.list-item.active {
   place-items: center;
   min-height: 100vh;
   padding: 1.5rem;
+  background: #faf6ee;
 }
 
 .login-card {
@@ -233,26 +332,28 @@ button.list-item.active {
 
 .login-form input {
   padding: 0.75rem 0.875rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.75rem;
+  border: 1px solid #ece0cf;
+  border-radius: 0.9rem;
+  background: #fffdf9;
+  color: #3b332a;
 }
 
 .primary-button,
 .ghost-button {
-  padding: 0.8rem 1rem;
+  padding: 0.8rem 1.1rem;
   border: 0;
-  border-radius: 0.75rem;
+  border-radius: 0.9rem;
   font-weight: 700;
 }
 
 .primary-button {
-  color: #ffffff;
-  background: #0f766e;
+  color: #fffdf9;
+  background: #3f6f5b;
 }
 
 .ghost-button {
-  color: #0f172a;
-  background: #e2e8f0;
+  color: #3b332a;
+  background: #f1ede2;
 }
 
 @media (max-width: 760px) {
@@ -264,6 +365,10 @@ button.list-item.active {
     grid-template-columns: 1fr;
   }
 
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .sidebar {
     padding-bottom: 1rem;
   }
@@ -271,5 +376,13 @@ button.list-item.active {
   .topbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .invoice-row {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-header {
+    display: none;
   }
 }
