@@ -13,6 +13,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseMiddleware<StaffMfaEnforcementMiddleware>();
 app.UseMiddleware<TenantContextMiddleware>();
 
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
