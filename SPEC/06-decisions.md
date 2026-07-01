@@ -91,3 +91,12 @@ Decisions existantes
 - Alternatives: Conserver Kine comme nom public
 - Impact: Branding et documentation alignes sur Q-INE; les identifiants techniques peuvent rester inchanges a court terme
 - Statut: Accepte
+
+- ID: D-010
+- Date: 2026-07-01
+- Sujet: Enforcement MFA staff MVP
+- Decision: MFA staff est enforce au niveau du fournisseur OIDC; l application ne stocke aucun secret MFA local et refuse toute session staff sans preuve MFA dans le token (claim amr/acr)
+- Contexte: P0-007 bloque car il manque un design authn/MFA implementation-ready
+- Alternatives: 1) MFA locale TOTP/SMS 2) MFA mixte local + IdP
+- Impact: Delta minimal, KISS, implementation rapide; dependance explicite a l IdP et absence de porte de secours locale au MVP
+- Statut: Accepte

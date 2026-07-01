@@ -166,3 +166,12 @@ Questions bloquantes architecture/cloud/database
 - Reponse:
 - Statut: Ouvert
 - Contexte: Go-live gate requirement. Template à finaliser (DPA, confidentialité, support SLA, retention clauses).
+
+- ID: Q-B19
+- Question: IdP OIDC retenu et signal d assurance MFA (claim amr/acr/equivalent) pour refuser tout login staff sans MFA?
+- Blocant: Oui
+- Owner: Security
+- Date cible: 2026-07-08
+- Reponse:
+- Statut: Ouvert
+- Contexte: P0-007 dépend d une preuve machine-lisible de MFA côté IdP; sans cela, impossible de définir le gate d authentification de façon déterministe.
