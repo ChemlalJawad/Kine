@@ -5,7 +5,8 @@ const navItems = [
   { to: '/app', label: 'Tableau de bord', end: true },
   { to: '/app/agenda', label: 'Agenda' },
   { to: '/app/patients', label: 'Patients' },
-  { to: '/app/facturation', label: 'Facturation' }
+  { to: '/app/facturation', label: 'Facturation' },
+  { to: '/app/reporting', label: 'Reporting' }
 ];
 
 export function AppShell() {
@@ -17,7 +18,8 @@ export function AppShell() {
     '/app': { eyebrow: 'Vue d’ensemble', title: `Bonjour, ${user?.displayName ?? 'staff'}` },
     '/app/agenda': { eyebrow: 'Module Agenda', title: 'Rendez-vous' },
     '/app/patients': { eyebrow: 'Module Patients', title: 'Dossiers patients' },
-    '/app/facturation': { eyebrow: 'Module Facturation', title: 'Remboursements' }
+    '/app/facturation': { eyebrow: 'Module Facturation', title: 'Remboursements' },
+    '/app/reporting': { eyebrow: 'Module Reporting', title: 'Activite du cabinet' }
   };
   const page = titles[location.pathname] ?? titles['/app'];
 

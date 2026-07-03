@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Kine.Modules.Audit.Application;
 using Kine.Modules.Scheduling.Application;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,7 @@ namespace Kine.Api.Modules;
 /// Minimal HTTP surface for the Scheduling module: slots (disponibilites), rdv,
 /// annulation, no-show. Tenant id is read from the request context (set by
 /// TenantContextMiddleware); requests reaching here are already tenant-scoped.
+/// Sensitive mutations are recorded in the append-only audit journal (P0-008).
 /// </summary>
 public static class SchedulingEndpoints
 {
@@ -22,11 +24,12 @@ public static class SchedulingEndpoints
     {
         var group = app.MapGroup("/api/scheduling");
 
-        group.MapPost("/slots", (CreateSlotRequest request, SchedulingService service, HttpContext context) =>
+        group.MapPost("/slots", (CreateSlotRequest request, SchedulingService service, AuditTrailService audit, HttpContext context) =>
         {
             try
             {
                 var slot = service.CreateSlot(Tenant(context), request.PractitionerId, request.StartAtUtc, request.EndAtUtc, Actor(context));
+                audit.Record(Tenant(context), Actor(context), "slot_created", "PractitionerSlot", slot.Id.ToString());
                 return Results.Created($"/api/scheduling/slots/{slot.Id}", slot);
             }
             catch (ArgumentException ex)
@@ -40,11 +43,12 @@ public static class SchedulingEndpoints
             return Results.Ok(service.ListSlots(Tenant(context)));
         });
 
-        group.MapPost("/appointments", (BookAppointmentRequest request, SchedulingService service, HttpContext context) =>
+        group.MapPost("/appointments", (BookAppointmentRequest request, SchedulingService service, AuditTrailService audit, HttpContext context) =>
         {
             try
             {
                 var appointment = service.BookAppointment(Tenant(context), request.SlotId, request.PatientId, Actor(context));
+                audit.Record(Tenant(context), Actor(context), "appointment_booked", "Appointment", appointment.Id.ToString(), $"patient={request.PatientId}; slot={request.SlotId}");
                 return Results.Created($"/api/scheduling/appointments/{appointment.Id}", appointment);
             }
             catch (ArgumentException ex)
@@ -72,11 +76,12 @@ public static class SchedulingEndpoints
             return appointment is null ? Results.NotFound() : Results.Ok(appointment);
         });
 
-        group.MapPost("/appointments/{id:guid}/cancel", (Guid id, SchedulingService service, HttpContext context) =>
+        group.MapPost("/appointments/{id:guid}/cancel", (Guid id, SchedulingService service, AuditTrailService audit, HttpContext context) =>
         {
             try
             {
                 var appointment = service.CancelAppointment(Tenant(context), id);
+                audit.Record(Tenant(context), Actor(context), "appointment_cancelled", "Appointment", appointment.Id.ToString());
                 return Results.Ok(appointment);
             }
             catch (KeyNotFoundException)
@@ -89,11 +94,12 @@ public static class SchedulingEndpoints
             }
         });
 
-        group.MapPost("/appointments/{id:guid}/no-show", (Guid id, SchedulingService service, HttpContext context) =>
+        group.MapPost("/appointments/{id:guid}/no-show", (Guid id, SchedulingService service, AuditTrailService audit, HttpContext context) =>
         {
             try
             {
                 var appointment = service.MarkNoShow(Tenant(context), id);
+                audit.Record(Tenant(context), Actor(context), "appointment_no_show", "Appointment", appointment.Id.ToString());
                 return Results.Ok(appointment);
             }
             catch (KeyNotFoundException)

@@ -1,3 +1,5 @@
+import { requestJson, type AuthHeaders } from './httpClient';
+
 export type PatientStatus = 0 | 1;
 export type PatientContactType = 0 | 1 | 2;
 export type ConsentType = 0 | 1 | 2;
@@ -9,6 +11,10 @@ export type Patient = {
   lastName: string;
   dateOfBirth: string | null;
   status: PatientStatus;
+  mutuelle: string | null;
+  diagnosis: string | null;
+  sessionsPrescribed: number;
+  sessionsDone: number;
   createdAtUtc: string;
   updatedAtUtc: string;
   createdBy: string;
@@ -39,54 +45,28 @@ export type PatientConsent = {
   createdBy: string;
 };
 
-type AuthHeaders = {
-  tenantId: string;
-  actorId: string;
-};
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
-
-async function requestJson<T>(path: string, init: RequestInit, auth: AuthHeaders): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Tenant-Id': auth.tenantId,
-      'X-Actor-Id': auth.actorId,
-      ...(init.headers ?? {})
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error(await response.text());
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return (await response.json()) as T;
-}
-
 export function listPatients(auth: AuthHeaders) {
   return requestJson<Patient[]>('/api/patients', { method: 'GET' }, auth);
 }
 
-export function createPatient(
-  auth: AuthHeaders,
-  payload: { firstName: string; lastName: string; dateOfBirth: string | null }
-) {
+export type PatientDraftFields = {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string | null;
+  mutuelle?: string | null;
+  diagnosis?: string | null;
+  sessionsPrescribed?: number;
+  sessionsDone?: number;
+};
+
+export function createPatient(auth: AuthHeaders, payload: PatientDraftFields) {
   return requestJson<Patient>('/api/patients', {
     method: 'POST',
     body: JSON.stringify(payload)
   }, auth);
 }
 
-export function updatePatient(
-  auth: AuthHeaders,
-  patientId: string,
-  payload: { firstName: string; lastName: string; dateOfBirth: string | null }
-) {
+export function updatePatient(auth: AuthHeaders, patientId: string, payload: PatientDraftFields) {
   return requestJson<Patient>(`/api/patients/${patientId}`, {
     method: 'PUT',
     body: JSON.stringify(payload)

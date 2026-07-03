@@ -1,21 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { appointmentStatusBadgeClass, appointmentStatusLabels } from '../data/appointmentStatus';
 import { listPatients, type Patient } from '../api/patientsApi';
 import { listAppointments, type Appointment } from '../api/schedulingApi';
+import { formatMontant, listInvoices, type Invoice } from '../api/billingApi';
 
-const statusLabels: Record<number, string> = {
-  0: 'Planifie',
-  1: 'Annule',
-  2: 'No-show',
-  3: 'Termine'
-};
-
-const statusBadgeClass: Record<number, string> = {
-  0: 'badge badge-success',
-  1: 'badge badge-danger',
-  2: 'badge badge-warning',
-  3: 'badge badge-neutral'
-};
+const pendingInvoiceStatus = 0;
 
 function isToday(isoUtc: string): boolean {
   const date = new Date(isoUtc);
@@ -27,6 +17,19 @@ function isToday(isoUtc: string): boolean {
   );
 }
 
+function isCurrentMonth(isoUtc: string): boolean {
+  const date = new Date(isoUtc);
+  const now = new Date();
+  return date.getUTCFullYear() === now.getUTCFullYear() && date.getUTCMonth() === now.getUTCMonth();
+}
+
+function formatTime(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' });
+}
+
 export function DashboardPage() {
   const { user } = useAuth();
   const tenantId = user?.tenantId ?? '';
@@ -35,16 +38,18 @@ export function DashboardPage() {
 
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    void Promise.all([listPatients(auth), listAppointments(auth)])
-      .then(([loadedPatients, loadedAppointments]) => {
+    void Promise.all([listPatients(auth), listAppointments(auth), listInvoices(auth)])
+      .then(([loadedPatients, loadedAppointments, loadedInvoices]) => {
         setPatients(loadedPatients);
         setAppointments(loadedAppointments);
+        setInvoices(loadedInvoices);
       })
       .catch((loadError) => setError(loadError.message));
-  }, []);
+  }, [auth]);
 
   const activePatients = patients.filter((patient) => patient.status === 0);
   const todaysAppointments = appointments
@@ -56,11 +61,19 @@ export function DashboardPage() {
     return patient ? `${patient.firstName} ${patient.lastName}` : patientId;
   };
 
+  // KPIs mockup 1b, desormais calcules depuis le module Billing reel:
+  // CA du mois = somme des factures emises ce mois-ci; remboursements en
+  // attente = factures au statut Pending.
+  const monthRevenue = invoices
+    .filter((invoice) => isCurrentMonth(invoice.createdAtUtc))
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
+  const pendingReimbursements = invoices.filter((invoice) => invoice.status === pendingInvoiceStatus).length;
+
   const kpis = [
-    { label: 'RDV aujourd\u2019hui', value: String(todaysAppointments.length) },
+    { label: 'RDV aujourd’hui', value: String(todaysAppointments.length) },
     { label: 'Patients actifs', value: String(activePatients.length) },
-    { label: 'Patients archives', value: String(patients.length - activePatients.length) },
-    { label: 'Total rendez-vous', value: String(appointments.length) }
+    { label: 'CA du mois', value: formatMontant(monthRevenue) },
+    { label: 'Remboursements en attente', value: String(pendingReimbursements) }
   ];
 
   return (
@@ -76,7 +89,7 @@ export function DashboardPage() {
         ))}
       </div>
 
-      <div className="panel" style={{ maxWidth: 'none' }}>
+      <div className="panel">
         <h3 style={{ marginTop: 0 }}>Planning du jour</h3>
         {todaysAppointments.length === 0 ? (
           <p className="muted">Aucun rendez-vous programme aujourd hui.</p>
@@ -87,10 +100,13 @@ export function DashboardPage() {
                 <div>
                   <strong>{patientName(appointment.patientId)}</strong>
                   <p className="muted compact">
-                    {appointment.practitionerId} &middot; {appointment.startAtUtc}
+                    {formatTime(appointment.startAtUtc)} – {formatTime(appointment.endAtUtc)} &middot;{' '}
+                    {appointment.practitionerId}
                   </p>
                 </div>
-                <span className={statusBadgeClass[appointment.status]}>{statusLabels[appointment.status]}</span>
+                <span className={appointmentStatusBadgeClass[appointment.status]}>
+                  {appointmentStatusLabels[appointment.status]}
+                </span>
               </div>
             ))}
           </div>

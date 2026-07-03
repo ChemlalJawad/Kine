@@ -148,13 +148,19 @@ button {
 
 .panel,
 .login-card {
-  max-width: 720px;
   padding: 20px;
   border: 1px solid #ece0cf;
   border-radius: 1.25rem;
   background: #fffdf9;
   box-shadow: 0 4px 16px rgba(120, 90, 50, 0.06);
 }
+
+/* .panel used to carry a shared max-width:720px meant only for the login
+   card. Every page panel (dashboard, patients, agenda, facturation) inherited
+   it too, so panels capped out mid-column while their grid siblings kept
+   growing -- uneven widths/gaps that read as "boxes stuck together" across
+   the site. The login card already gets its own width via `width: min(100%,
+   420px)` below, so panels elsewhere are now free to fill their container. */
 
 .stack {
   display: grid;
@@ -191,10 +197,65 @@ button {
   gap: 0.75rem;
 }
 
-.patients-grid {
+/* Patients page: list + dossier, matching the design mockup's two-column ratio */
+.patients-layout {
   display: grid;
   gap: 1rem;
-  grid-template-columns: 1fr 1.35fr 0.7fr;
+  grid-template-columns: 1fr 1.4fr;
+  align-items: start;
+}
+
+.dossier-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 0.75rem 1rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.detail-grid .detail-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ab9f8c;
+}
+
+.detail-grid strong {
+  font-size: 0.9rem;
+  color: #3b332a;
+}
+
+.progress-block {
+  padding-top: 1rem;
+  border-top: 1px solid #ece0cf;
+}
+
+.progress-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #f1ede2;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #3f6f5b;
 }
 
 .subpanel {
@@ -244,10 +305,6 @@ button.list-item.active {
 .error {
   margin: 0;
   color: #b3441f;
-}
-
-.status-panel {
-  align-self: start;
 }
 
 /* KPI cards on the dashboard */
@@ -309,6 +366,26 @@ button.list-item.active {
   color: #8a8378;
 }
 
+/* agenda day view (vue journee, mockup 1b) */
+.agenda-day {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.agenda-day-title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #3b332a;
+}
+
+.agenda-time {
+  width: 3.5rem;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #3b332a;
+}
+
 /* invoices table (facturation) */
 .invoice-table {
   display: grid;
@@ -317,7 +394,7 @@ button.list-item.active {
 
 .invoice-row {
   display: grid;
-  grid-template-columns: 1.3fr 0.7fr 1.6fr 0.7fr 1fr 0.8fr;
+  grid-template-columns: 1.3fr 0.7fr 1.6fr 0.7fr 1fr 0.8fr 1.1fr;
   gap: 0.5rem;
   align-items: center;
   padding: 0.75rem 0.9rem;
@@ -326,6 +403,17 @@ button.list-item.active {
   background: #faf6ee;
   font-size: 0.85rem;
   color: #3b332a;
+}
+
+/* inline status actions (Remboursé / Rejeté) on pending invoices */
+.invoice-actions {
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.invoice-actions .ghost-button {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.75rem;
 }
 
 .invoice-header {
@@ -337,6 +425,23 @@ button.list-item.active {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #ab9f8c;
+}
+
+/* reporting monthly table */
+.report-row {
+  display: grid;
+  grid-template-columns: 1fr 0.6fr 0.7fr 0.7fr 0.7fr 0.7fr 0.9fr 0.9fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.report-row.invoice-row-plain {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #ece0cf;
+  border-radius: 1rem;
+  background: #faf6ee;
+  font-size: 0.85rem;
+  color: #3b332a;
 }
 
 .login-screen {
@@ -377,11 +482,33 @@ button.list-item.active {
   border: 0;
   border-radius: 0.9rem;
   font-weight: 700;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
 }
 
 .primary-button {
   color: #fffdf9;
   background: #3f6f5b;
+  box-shadow: 0 2px 8px rgba(63, 111, 91, 0.25);
+}
+
+.primary-button:hover {
+  background: #365f4e;
+  box-shadow: 0 4px 14px rgba(63, 111, 91, 0.32);
+  transform: translateY(-1px);
+}
+
+.primary-button:active {
+  background: #2f5344;
+  box-shadow: 0 1px 4px rgba(63, 111, 91, 0.28);
+  transform: translateY(0);
+}
+
+.primary-button:disabled {
+  background: #cbd3ce;
+  color: #7c8a83;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .ghost-button {
@@ -389,12 +516,69 @@ button.list-item.active {
   background: #f1ede2;
 }
 
+.ghost-button:hover {
+  background: #e9e2d2;
+}
+
+.ghost-button:active {
+  background: #ded5c0;
+}
+
+.ghost-button:disabled {
+  color: #a39c8e;
+  cursor: not-allowed;
+}
+
+.primary-button:focus-visible,
+.ghost-button:focus-visible {
+  outline: 2px solid #3f6f5b;
+  outline-offset: 2px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(59, 51, 42, 0.45);
+  z-index: 50;
+}
+
+.modal-panel {
+  width: min(92vw, 480px);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* Creation/add actions: leading "+" glyph and slightly stronger emphasis,
+   so they stand out from save/edit/toolbar actions in the same panel. */
+.primary-button.is-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.primary-button.is-create::before {
+  content: '+';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.24);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 @media (max-width: 760px) {
   .app-shell {
     grid-template-columns: 1fr;
   }
 
-  .patients-grid {
+  .patients-layout {
     grid-template-columns: 1fr;
   }
 

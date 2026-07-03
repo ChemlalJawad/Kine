@@ -1,3 +1,5 @@
+import { requestJson, type AuthHeaders } from './httpClient';
+
 export type AppointmentStatus = 0 | 1 | 2 | 3;
 
 export type PractitionerSlot = {
@@ -25,35 +27,6 @@ export type Appointment = {
   updatedAtUtc: string;
   createdBy: string;
 };
-
-type AuthHeaders = {
-  tenantId: string;
-  actorId: string;
-};
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
-
-async function requestJson<T>(path: string, init: RequestInit, auth: AuthHeaders): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Tenant-Id': auth.tenantId,
-      'X-Actor-Id': auth.actorId,
-      ...(init.headers ?? {})
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error(await response.text());
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return (await response.json()) as T;
-}
 
 export function listSlots(auth: AuthHeaders) {
   return requestJson<PractitionerSlot[]>('/api/scheduling/slots', { method: 'GET' }, auth);

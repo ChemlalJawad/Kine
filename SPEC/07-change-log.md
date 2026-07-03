@@ -182,3 +182,93 @@ Historique
 - Zone: Frontend
 - Description: Correction d un bug pre-existant dans PatientsPage/AgendaPage: useAuth() n exposait pas tenantId/actorId directement (uniquement via user.tenantId/user.actorId), ce qui aurait envoye des headers tenant/actor vides a l API. Les deux pages lisent desormais tenantId/actorId depuis user. Corrige a l occasion de P0-010 car necessaire au bon fonctionnement du parcours patient -> rendez-vous.
 - Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Changed
+- Zone: Frontend
+- Description: Correction bug dev 404 sur /api/*: le frontend appelait des chemins relatifs sans proxy ni URL absolue (la requete atteignait le serveur Vite lui-meme au lieu de Kine.Api). Ajout d un proxy Vite (/api -> backend, cible configurable via VITE_API_PROXY_TARGET) et elargissement de la policy CORS LocalDev pour accepter tout port localhost (Vite change de port des que 5173 est occupe). Ajout de Kine.Api/Seed/DemoDataSeeder.cs pour peupler tenant-demo au demarrage (patients, contacts, consentements, creneaux/rdv du jour) afin que l UI ne soit plus vide au premier lancement.
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Changed
+- Zone: Frontend
+- Description: Refonte visuelle PatientsPage pour correspondre au mockup Claude Design (option 1b, handoff zip): layout 2 colonnes (liste + dossier patient) au lieu de 3 colonnes CRUD brutes, formulaire de creation replie par defaut, bandeau de message d etat au lieu d une colonne dediee. Boutons de creation (Kine.Web): etats hover/active/focus-visible/disabled + icone "+".
+- Auteur: Agent
+
+- Date: 2026-07-01
+- Type: Added
+- Zone: Backend/Patients
+- Description: Extension du modele Patient (Mutuelle, Diagnosis, SessionsPrescribed, SessionsDone en champs texte/entiers optionnels) pour permettre au dossier patient (Kine.Web) d afficher mutuelle, diagnostic et une barre de progression des seances comme dans le mockup design. Ce sont des champs plats sur Patient en placeholder MVP: aucune validation INAMI, aucun lien reel avec un plan de traitement ou des rendez-vous -- a remplacer par le futur module Clinical/Reimbursement. PatientService.CreatePatient/UpdatePatient et les DTOs HTTP (CreatePatientRequest/UpdatePatientRequest) etendus avec des parametres optionnels (retro-compatibles avec les appels existants et les tests). DemoDataSeeder mis a jour avec les valeurs du mockup (Sophie/Marc/Amina/Louis).
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Changed
+- Zone: Frontend
+- Description: Refonte visuelle AgendaPage pour correspondre au mockup Claude Design (option 1b): panel unique pleine largeur au lieu du layout 3 colonnes CRUD brutes (disponibilites / rendez-vous / etat), avec un planning fusionnant creneaux et rendez-vous (une ligne par creneau, triee par heure, affichant le patient/statut si reserve ou "Creneau libre" sinon). Creation de creneau et reservation de rendez-vous repliees par defaut derriere des boutons bascule (meme pattern que PatientsPage), formulaire refermé automatiquement apres succes. Annulation/no-show restent inline sur chaque ligne reservee. Aucune perte de fonctionnalite CRUD.
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Fixed
+- Zone: Frontend
+- Description: Correction d un bug de mise en page site-large ("boites collees"): la regle .panel partageait un max-width:720px pense uniquement pour .login-card. Chaque page appliquant un panel dans une grille (Patients, Agenda) ou pleine largeur (Dashboard, Facturation) heritait de cette limite, plafonnant certains panels a 720px pendant que leurs voisins de grille restaient plus larges -- largeurs/espacements incoherents d une page a l autre. max-width retire de la regle partagee .panel/.login-card (le login-card garde sa largeur via width:min(100%,420px) deja presente); suppression des contournements inline style={{maxWidth:'none'}} devenus inutiles sur DashboardPage/FacturationPage. Nettoyage CSS mort associe (.patients-grid, .status-panel, non references depuis la refonte Agenda).
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Changed
+- Zone: Frontend
+- Description: Formulaires de creation deplaces dans des popups (nouveau composant Kine.Web/src/components/Modal.tsx: overlay + panel centre, fermeture via clic exterieur/Echap/bouton Fermer) au lieu de formulaires inline colles contre les listes/boutons: Agenda (Nouveau creneau, Nouveau rendez-vous) et Patients (Nouveau patient). Ajout d une action dediee "+ Ajouter une seance" dans le dossier patient (incremente SessionsDone de 1 et sauvegarde immediatement), en complement du formulaire d edition existant (modifier infos patient). Layout Patients confirme a deux colonnes (liste + dossier) conforme a la maquette; aucun changement necessaire sur ce point, deja en place depuis la refonte precedente.
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Fixed
+- Zone: Frontend
+- Description: PatientsPage.tsx -- tous les handlers de mutation (creation patient, ajout de seance, enregistrer, archiver, contacts, consentements) appelaient l API sans try/catch: une erreur (ex. requete rejetee) echouait silencieusement, sans message affiche, laissant croire a l utilisateur que l action "ne fonctionne pas" (ex. bouton "+ Ajouter une seance"). Tous ces handlers entourent desormais l appel API d un try/catch qui alimente la bannière d erreur existante, alignes sur le pattern deja utilise dans AgendaPage.
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Note
+- Zone: Backend/Seed
+- Description: Signalement utilisateur "le dashboard n a pas de planning": DemoDataSeeder ne seme les rendez-vous du jour qu au demarrage du process (skip si le store contient deja des patients), avec "aujourd hui" fige a DateTime.UtcNow.Date au moment du Seed(). Si l API Kine.Api tourne depuis un jour precedent (store in-memory jamais vide, jamais reseme), le filtre isToday() du Dashboard (base sur la date reelle courante) ne trouve plus aucun rendez-vous du jour -- comportement attendu de stores in-memory non persistes, pas un bug de code; necessite un redemarrage de l API pour reseme "aujourd hui" avec la date courante. Pas de changement de code effectue (aucune conception de reseed automatique/DB demandee); a tracker si le comportement doit devenir plus robuste.
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Changed
+- Zone: Frontend
+- Description: Revue exhaustive de toutes les pages (Dashboard, Agenda, Patients, Facturation, AppShell) contre le mockup design (Q-INE Redesign.dc.html, option 1b) suite a demande explicite. Ecarts trouves et corriges: (1) badge du creneau libre en Agenda utilisait "badge-success" (vert, comme Confirme) au lieu de "badge-neutral" (gris, comme le mockup) -- corrige; (2) libelles de statut rendez-vous sans accents ("Planifie", "Annule", "Termine") et statut 0 renomme "Confirme" pour matcher le vocabulaire du mockup -- extrait dans data/appointmentStatus.ts partage entre Agenda et Dashboard (evite la duplication precedente des deux memes const dans les deux fichiers); (3) libelles de statut facture sans accents ("Rembourse", "Rejete") -- corrige et extrait dans data/facturationData.ts, partage avec le Dashboard; (4) KPIs du Dashboard ne correspondaient pas au mockup ("Patients archives"/"Total rendez-vous" au lieu de "CA du mois"/"Remboursements en attente") -- recalcules a partir des memes donnees statiques que FacturationPage (voir data/facturationData.ts: totalMontant/countPending), pour rester honnetes (pas de faux chiffres inventes) tout en affichant les bons libelles; (5) dossier patient: la grille de details montrait Date de naissance/Mutuelle/Statut/Cree par au lieu de Naissance/Mutuelle/Telephone/Derniere seance (mockup) -- Telephone derive des contacts existants (type Phone, priorite au contact primaire), Derniere seance derivee du dernier rendez-vous Termine (nouvel appel a listAppointments dans PatientsPage) -- aucun nouveau champ stocke, uniquement calcule (voir Q-B20 ci-dessous pour l analyse complete); (6) le formulaire d edition patient (Prenom/Nom/.../Enregistrer/Archiver) etait toujours visible sous la barre de progression au lieu d etre derriere un bouton "Modifier" comme le mockup -- deplace dans une popup (reutilise le composant Modal), "Archiver" y a ete deplace comme action secondaire; le dossier par defaut affiche desormais exactement les 2 boutons du mockup ("+ Ajouter une seance", "Modifier"); (7) marque/brand sidebar "Cabinet staff" -> "Cabinet Vandenberghe" (mockup); displayName demo par defaut "Staff cabinet" -> "Sophie Vandenberghe" (mockup montre "Bonjour, Sophie"), salutation Dashboard n utilise desormais que le prenom. Contacts/Consentements (fonctionnalites RGPD reelles) conserves sous les 2 boutons bien qu absents du mockup simplifie -- deviation deliberee et documentee, pas une regression.
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Changed
+- Zone: Backend/Seed
+- Description: DemoDataSeeder etendu avec un rendez-vous Termine par patient (Sophie -1j, Marc -2j, Amina -7j, Louis -51j) pour que "Derniere seance" (desormais calculee, voir ci-dessus) ait une vraie valeur pour les 4 patients de demo au lieu de rester a "—" pour 3 d entre eux.
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Added
+- Zone: Backend/Frontend/Facturation
+- Description: Module Facturation reel ajoute (Kine.Modules.Billing): entites Invoice/InvoiceStatus (Pending/Reimbursed/Rejected)/ActeInami, BillingService (CreateInvoice valide contre ActeInamiCatalog, MarkReimbursed/MarkRejected via transition d etat), InMemoryInvoiceStore tenant-scope, endpoints /api/billing/actes + /api/billing/invoices (+ mark-reimbursed/mark-rejected). Frontend: src/api/billingApi.ts (nouveau, consomme un httpClient partage) + FacturationPage.tsx reecrite (creation de facture en popup Modal, mutuelle auto-remplie depuis le dossier patient, montant fixe par l acte, actions inline Rembourse/Rejete sur les factures en attente). Ceci remplace le placeholder data/facturationData.ts (donnees statiques inventees, desormais supprime du repo) qui servait uniquement a satisfaire visuellement le mockup: repond directement a la question posee sur "quelles infos garder en DB" pour la facturation -- une Invoice est maintenant une entite reelle, tracable et transitionnee par etat, plutot qu un tableau statique. DashboardPage.tsx mis a jour en consequence: "CA du mois" et "Remboursements en attente" sont recalcules a partir de billingApi.listInvoices() (somme des montants factures du mois courant / compte des factures au statut Pending), plus aucune donnee inventee affichee comme un KPI.
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Changed
+- Zone: Frontend/Agenda
+- Description: AgendaPage.tsx -- planning desormais regroupe par jour (helpers formatFullDay "Mardi 1 juillet 2026" / dayKey, sections .agenda-day) au lieu d une liste plate de creneaux, pour matcher la vue journee du mockup 1b. Chargement/CRUD inchange (tous les creneaux sont recuperes puis groupes cote client); aucune navigation date/pagination ajoutee -- cf. Q-B21 (SPEC/11-open-questions.md) pour la question ouverte sur une eventuelle navigation jour-par-jour explicite.
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Fixed
+- Zone: Backend/Frontend/Facturation
+- Description: Restauration du module Facturation decrit dans l entree "Module Facturation reel ajoute" ci-dessous: les fichiers de code de cette session precedente etaient partiellement perdus/tronques sur disque (Kine.Modules.Billing absent, FacturationPage/Dashboard toujours sur data/facturationData.ts statique, plusieurs fichiers frontend et AuthContext.tsx/AppShell.tsx tronques en fin de fichier -- AuthContext.tsx ne compilait plus). Reimplementation complete conformement a la description existante (Invoice/InvoiceStatus/ActeInami, BillingService + ActeInamiCatalog, InMemoryInvoiceStore, endpoints /api/billing, billingApi.ts + httpClient.ts partage, FacturationPage reecrite, KPIs Dashboard recalcules depuis l API, facturationData.ts supprime, vue journee Agenda avec formatFullDay/dayKey) avec en plus: seed Billing dans DemoDataSeeder (4 factures demo alignees sur le mockup), 12 tests unitaires BillingServiceTests + 6 tests d integration BillingEndpointTests (tenant manquant, catalogue, roundtrip create->mark-reimbursed, code INAMI inconnu, double transition 409, isolation cross-tenant), et correction des dependances useEffect ([] -> [auth]) sur Dashboard/Agenda/Facturation/Patients. Fichiers tronques repares a l identique. Verification: vite build + tsc --noEmit OK; dotnet build/test a relancer cote poste local (SDK indisponible dans l environnement d execution).
+- Auteur: Agent
+
+- Date: 2026-07-03
+- Type: Added
+- Zone: Backend/Frontend (lot "continuer le dev de tout", valide par l'utilisateur)
+- Description: (1) P0-008 complete -- AuditTrailService/InMemoryAuditLogStore enregistres dans le pipeline et branches sur toutes les mutations sensibles (patient_created/updated/archived, contacts/consentements, slot_created, appointment_booked/cancelled/no_show, invoice_created/reimbursed/rejected, seance_created, reimbursement_case_created/status_changed); nouveaux endpoints read-only /api/audit/events et /api/audit/verify (verification hash chain). (2) P0-006 complete -- RbacMiddleware avec roles AdminCabinet/Kine/Assistant/Billing extraits des claims OIDC ou du header X-Roles (fallback dev/demo, aligne sur le gate MFA: sans information de role la requete passe, des qu'un role est fourni la matrice est appliquee et retourne 403 si insuffisant); matrice par zone API (patients/scheduling: ecriture Admin+Kine+Assistant; billing/reimbursement: Admin+Billing; clinical: ecriture Admin+Kine; reporting/audit: Admin seul); frontend envoie X-Roles (AuthContext.roles, demo=AdminCabinet). (3) Clinical v1 -- Q-B20 tranche par l'utilisateur: SeanceClinique reelle (date, note, lien rdv optionnel, append-only), ClinicalService/InMemorySeanceStore, endpoints /api/clinical/patients/{id}/seances; PatientsPage: "+ Ajouter une seance" ouvre une popup et cree une seance reelle, progression derivee du COUNT de seances, section "Seances" dans le dossier, champ SessionsDone deprecie (conserve en API, plus edite). (4) Reimbursement v1 -- ReimbursementCase (factures liees par id opaque), machine a etats SPEC/14 complete (9 etats, transitions validees, tests exhaustifs), soumission eFact MOCKEE (Q-B03 ouvert: SubmissionRef locale EFACT-yyyy-xxxxxxxx, aucune integration eHealth), endpoints /api/reimbursement/cases (+ /status), section "Dossiers de remboursement" dans FacturationPage (creation depuis les factures en attente, boutons de transition contextuels). (5) Reporting v1 -- /api/reporting/summary (agregats mensuels: rdv/termines/annules/no-shows/seances/CA facture/rembourse + patients actifs/archives) et /api/reporting/export.csv, composes dans la couche API (le module Reporting reste un marqueur); nouvelle page Reporting (KPIs, tableau mensuel, export CSV) + entree de navigation. (6) CI GitHub Actions (.github/workflows/ci.yml): build+tests .NET, typecheck+build frontend. Seed demo etendu (32 seances alignees sur les anciens compteurs, 1 dossier remboursement Draft regroupant les factures en attente). Tests ajoutes: ClinicalServiceTests (8), ReimbursementServiceTests (13 dont matrice de transitions), ClinicalEndpointTests (3), ReimbursementEndpointTests (5), RbacEndpointTests (6), AuditTrailEndpointTests (2), ReportingEndpointTests (2). Verification: vite build + tsc --noEmit OK; dotnet build/test a executer cote poste local (SDK indisponible dans l'environnement d'execution).
+- Auteur: Agent
+
+- Date: 2026-07-02
+- Type: Changed
+- Zone: SPEC
+- Description: Q-B20 (SPEC/11-open-questions.md) complete avec l analyse derive-vs-manuel demandee: Telephone/Derniere seance sont deriveés (source de verite = Contact/Appointment reels), SessionsDone reste un entier manuel faute d entite "seance clinique" reelle (Clinical est un scaffold vide) -- le precedent Billing (placeholder -> module reel dans la meme session) illustre le chemin de migration a suivre le jour ou Clinical existe. Ajout Q-B21 (Agenda: vue jour groupee vs navigation jour-par-jour explicite) et Q-B22 (richesse du vocabulaire de statut Appointment, notamment avant que Clinical/Billing ne s y accrochent).
+- Auteur: Agent

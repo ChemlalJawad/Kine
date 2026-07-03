@@ -28,15 +28,20 @@ Tableau taches (backlog P0)
 | P0-003 | Provisionner infra dev/staging/prod | Kine Dev | Blocked | Bloque par Q-B02/Q-B08/Q-B10 |
 | P0-004 | Implementer tenant context middleware | Kine Dev | In progress | Branche feature/p0-004 |
 | P0-005 | Activer RLS sur tables coeur | Kine Dev | Done | Policies SQL + tests anti-fuite cross-tenant |
-| P0-006 | Implementer RBAC par cabinet | Kine Dev | Ready | Q-B06 ferme |
+| P0-006 | Implementer RBAC par cabinet | Kine Dev | Done | RbacMiddleware (claims OIDC / X-Roles demo), matrice testee |
 | P0-007 | MFA staff obligatoire | Kine Dev | Blocked | Design MFA/authn a cadrer |
 | P0-008 | Journal audit append-only | Kine Dev | In progress | Branche feature/p0-008 |
 | P0-009 | Module Patients v1 | Kine Dev | Done | Branche feature/P0-009; API + UI staff minimale, tests verts |
 | P0-010 | Module Agenda v1 | Kine Dev | Done | Branche feature/P0-010; API + UI staff minimale, tests verts |
 | P0-007 | MFA staff obligatoire | Kine Dev | In progress | Branche feature/p0-007, Swagger API demande |
-| P0-008 | Journal audit append-only | Kine Dev | Ready | Detail preuve audit a preciser (Q-B14 non bloquant) |
-| P0-009 | Module Patients v1 | Kine Dev | Blocked | Impact Q-B04/Q-B15 |
-| P0-010 | Module Agenda v1 | Kine Dev | Ready-with-dependency | Critere e2e depend de P0-009 |
+| P0-008 | Journal audit append-only | Kine Dev | Done | Branche sur toutes les mutations sensibles + /api/audit/events + /verify |
+| P0-009 | Module Patients v1 | Kine Dev | Done | Voir tableau ci-dessus |
+| P0-010 | Module Agenda v1 | Kine Dev | Done | Voir tableau ci-dessus |
+| P0-011 | Module Facturation v1 | Kine Dev | Done | Invoice + actes INAMI (montants placeholders) + UI |
+| P0-012 | Module Clinical v1 (seances) | Kine Dev | Done | Q-B20 tranche: seances reelles, compteur derive |
+| P0-013 | Module Reimbursement v1 | Kine Dev | Done | State machine SPEC/14, eFact mocke (Q-B03) |
+| P1-001 | Reporting v1 | Kine Dev | Done | /api/reporting/summary + export CSV + page UI |
+| P1-002 | Pipeline CI | Kine Dev | Done | GitHub Actions build+tests .NET / frontend |
 
 Journal orchestration
 - 2026-07-01 16:56 CET - Orchestrator: prise en charge du pilotage projet.
@@ -65,6 +70,9 @@ Journal orchestration
 - 2026-07-01 20:28 CET - Kine Dev: P0-010 complete (Kine.Modules.Scheduling: slots/rdv/annulation/no-show, 14 tests unitaires + 6 tests integration verts) + UI staff Agenda minimale reutilisant patientsApi; correction bug pre-existant tenantId/actorId dans useAuth() (Patients+Agenda).
 - 2026-07-01 19:30 CET - Orchestrator: branche feature/p0-007 creee pour le lot MFA.
 - 2026-07-01 19:30 CET - Orchestrator: P0-007 lance en dev avec demande Swagger API.
+- 2026-07-02 - Kine Dev: P0-011 Module Facturation v1 (restaure apres perte partielle de fichiers, + tests + seed); refonte Agenda vue journee; KPIs Dashboard branches sur Billing reel.
+- 2026-07-03 - User: validation du lot "continuer le dev de tout" (audit branche + RBAC + Clinical + Reimbursement mock + Reporting + CI); Q-B20 tranche (seances reelles); RBAC valide en mode claims OIDC + header X-Roles demo.
+- 2026-07-03 - Kine Dev: P0-006, P0-008, P0-012, P0-013, P1-001, P1-002 livres (voir SPEC/07-change-log.md). Verification frontend OK; dotnet build/test a executer localement (SDK indisponible dans l'environnement agent).
 
 Actions realisees
 - Gouvernance multi-agents activee (Orchestrator/Dev/Analysis/Architecture).

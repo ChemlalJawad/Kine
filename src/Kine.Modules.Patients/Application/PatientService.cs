@@ -17,7 +17,16 @@ public sealed class PatientService
         _store = store ?? throw new ArgumentNullException(nameof(store));
     }
 
-    public Patient CreatePatient(string tenantId, string firstName, string lastName, DateOnly? dateOfBirth, string createdBy)
+    public Patient CreatePatient(
+        string tenantId,
+        string firstName,
+        string lastName,
+        DateOnly? dateOfBirth,
+        string createdBy,
+        string? mutuelle = null,
+        string? diagnosis = null,
+        int sessionsPrescribed = 0,
+        int sessionsDone = 0)
     {
         RequireTenant(tenantId);
         RequireNonEmpty(firstName, nameof(firstName));
@@ -33,6 +42,10 @@ public sealed class PatientService
             LastName = lastName,
             DateOfBirth = dateOfBirth,
             Status = PatientStatus.Active,
+            Mutuelle = mutuelle,
+            Diagnosis = diagnosis,
+            SessionsPrescribed = sessionsPrescribed,
+            SessionsDone = sessionsDone,
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
             CreatedBy = createdBy
@@ -54,7 +67,16 @@ public sealed class PatientService
         return _store.GetAll(tenantId);
     }
 
-    public Patient UpdatePatient(string tenantId, Guid patientId, string firstName, string lastName, DateOnly? dateOfBirth)
+    public Patient UpdatePatient(
+        string tenantId,
+        Guid patientId,
+        string firstName,
+        string lastName,
+        DateOnly? dateOfBirth,
+        string? mutuelle = null,
+        string? diagnosis = null,
+        int? sessionsPrescribed = null,
+        int? sessionsDone = null)
     {
         RequireTenant(tenantId);
         RequireNonEmpty(firstName, nameof(firstName));
@@ -68,6 +90,10 @@ public sealed class PatientService
             FirstName = firstName,
             LastName = lastName,
             DateOfBirth = dateOfBirth,
+            Mutuelle = mutuelle ?? existing.Mutuelle,
+            Diagnosis = diagnosis ?? existing.Diagnosis,
+            SessionsPrescribed = sessionsPrescribed ?? existing.SessionsPrescribed,
+            SessionsDone = sessionsDone ?? existing.SessionsDone,
             UpdatedAtUtc = DateTime.UtcNow
         };
 

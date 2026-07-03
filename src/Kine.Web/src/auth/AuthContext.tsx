@@ -4,6 +4,8 @@ type AuthUser = {
   email: string;
   displayName: string;
   role: string;
+  /** Roles cabinet RBAC (P0-006): AdminCabinet | Kine | Assistant | Billing. */
+  roles: string[];
   tenantId: string;
   actorId: string;
 };
@@ -16,6 +18,7 @@ type AuthContextValue = {
 };
 
 const storageKey = 'qine.auth.user';
+const defaultRoles = ['AdminCabinet'];
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -30,7 +33,9 @@ function readUser(): AuthUser | null {
   }
 
   try {
-    return JSON.parse(raw) as AuthUser;
+    const parsed = JSON.parse(raw) as AuthUser;
+    // Older stored sessions predate the RBAC roles field.
+    return { ...parsed, roles: parsed.roles ?? defaultRoles };
   } catch {
     window.localStorage.removeItem(storageKey);
     return null;
@@ -60,8 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setUser({
       email: normalizedEmail,
-      displayName: 'Staff cabinet',
+      displayName: 'Sophie Vandenberghe',
       role: 'Acces demo',
+      roles: defaultRoles,
       tenantId: normalizedTenantId,
       actorId: normalizedActorId
     });
