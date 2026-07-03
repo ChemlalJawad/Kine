@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { DateTimeField } from '../components/DateTimeField';
 import { Modal } from '../components/Modal';
 import {
   archivePatient,
@@ -40,7 +41,7 @@ const consentTypeOptions: Array<{ value: ConsentType; label: string }> = [
 type Draft = {
   firstName: string;
   lastName: string;
-  dateOfBirth: string;
+  dateOfBirth: Date | null;
   mutuelle: string;
   diagnosis: string;
 };
@@ -54,9 +55,26 @@ function formatDate(value: string | null | undefined): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('fr-BE');
 }
 
-function toLocalDateTimeInput(date: Date): string {
+/** DateOnly backend ("yyyy-MM-dd") depuis une Date locale, sans decalage UTC. */
+function toDateOnly(date: Date | null): string | null {
+  if (!date) {
+    return null;
+  }
+
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** Date locale depuis un DateOnly backend ("yyyy-MM-dd"), sans decalage UTC. */
+function fromDateOnly(value: string | null): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  const [year, month, day] = value.split('-').map(Number);
+  return Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)
+    ? null
+    : new Date(year, month - 1, day);
 }
 
 export function PatientsPage() {
@@ -76,10 +94,13 @@ export function PatientsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSeanceModal, setShowSeanceModal] = useState(false);
-  const [draft, setDraft] = useState<Draft>({ firstName: '', lastName: '', dateOfBirth: '', mutuelle: '', diagnosis: '' });
+  const [draft, setDraft] = useState<Draft>({ firstName: '', lastName: '', dateOfBirth: null, mutuelle: '', diagnosis: '' });
   const [contactDraft, setContactDraft] = useState({ type: 0 as PatientContactType, value: '', isPrimary: false });
   const [consentDraft, setConsentDraft] = useState({ type: 0 as ConsentType, granted: true });
-  const [seanceDraft, setSeanceDraft] = useState({ dateSeance: toLocalDateTimeInput(new Date()), note: '' });
+  const [seanceDraft, setSeanceDraft] = useState<{ dateSeance: Date | null; note: string }>({
+    dateSeance: new Date(),
+    note: ''
+  });
 
   const selectedPatient = patients.find((patient) => patient.id === selectedPatientId) ?? null;
 
@@ -161,11 +182,11 @@ export function PatientsPage() {
       await createPatient(auth, {
         firstName: draft.firstName,
         lastName: draft.lastName,
-        dateOfBirth: draft.dateOfBirth || null,
+        dateOfBirth: toDateOnly(draft.dateOfBirth),
         mutuelle: draft.mutuelle || null,
         diagnosis: draft.diagnosis || null
       });
-      setDraft({ firstName: '', lastName: '', dateOfBirth: '', mutuelle: '', diagnosis: '' });
+      setDraft({ firstName: '', lastName: '', dateOfBirth: null, mutuelle: '', diagnosis: '' });
       setShowCreateModal(false);
       await loadPatients();
       setMessage('Patient cree.');
@@ -184,10 +205,10 @@ export function PatientsPage() {
     setMessage('');
     try {
       await createSeance(auth, selectedPatient.id, {
-        dateSeanceUtc: seanceDraft.dateSeance ? `${seanceDraft.dateSeance}:00Z` : new Date().toISOString(),
+        dateSeanceUtc: (seanceDraft.dateSeance ?? new Date()).toISOString(),
         note: seanceDraft.note || null
       });
-      setSeanceDraft({ dateSeance: toLocalDateTimeInput(new Date()), note: '' });
+      setSeanceDraft({ dateSeance: new Date(), note: '' });
       setShowSeanceModal(false);
       await loadDetails(selectedPatient.id);
       setMessage('Seance enregistree.');
@@ -204,10 +225,12 @@ export function PatientsPage() {
     setError('');
     setMessage('');
     try {
+      // "" (date effacee) doit devenir null: le binding DateOnly? du backend
+      // rejette la chaine vide, ce qui faisait echouer l'enregistrement.
       await updatePatient(auth, selectedPatient.id, {
         firstName: selectedPatient.firstName,
         lastName: selectedPatient.lastName,
-        dateOfBirth: selectedPatient.dateOfBirth,
+        dateOfBirth: selectedPatient.dateOfBirth || null,
         mutuelle: selectedPatient.mutuelle,
         diagnosis: selectedPatient.diagnosis,
         sessionsPrescribed: selectedPatient.sessionsPrescribed,
@@ -620,10 +643,10 @@ export function PatientsPage() {
               </label>
               <label>
                 Date de naissance
-                <input
-                  type="date"
+                <DateTimeField
                   value={draft.dateOfBirth}
-                  onChange={(event) => setDraft({ ...draft, dateOfBirth: event.target.value })}
+                  onChange={(dateOfBirth) => setDraft({ ...draft, dateOfBirth })}
+                  maxDate={new Date()}
                 />
               </label>
               <label>
@@ -658,10 +681,11 @@ export function PatientsPage() {
             <div className="form-grid">
               <label>
                 Date et heure
-                <input
-                  type="datetime-local"
+                <DateTimeField
                   value={seanceDraft.dateSeance}
-                  onChange={(event) => setSeanceDraft({ ...seanceDraft, dateSeance: event.target.value })}
+                  onChange={(dateSeance) => setSeanceDraft({ ...seanceDraft, dateSeance })}
+                  showTime
+                  maxDate={new Date()}
                 />
               </label>
               <label>
@@ -704,10 +728,10 @@ export function PatientsPage() {
               </label>
               <label>
                 Date de naissance
-                <input
-                  type="date"
-                  value={selectedPatient.dateOfBirth ?? ''}
-                  onChange={(event) => updateSelectedPatient('dateOfBirth', event.target.value)}
+                <DateTimeField
+                  value={fromDateOnly(selectedPatient.dateOfBirth)}
+                  onChange={(date) => updateSelectedPatient('dateOfBirth', toDateOnly(date) ?? '')}
+                  maxDate={new Date()}
                 />
               </label>
               <label>

@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { DateTimeField } from '../components/DateTimeField';
 import { Modal } from '../components/Modal';
 import { appointmentStatusBadgeClass, appointmentStatusLabels } from '../data/appointmentStatus';
 import { listPatients, type Patient } from '../api/patientsApi';
@@ -16,8 +17,8 @@ import {
 
 type SlotDraft = {
   practitionerId: string;
-  startAtUtc: string;
-  endAtUtc: string;
+  startAt: Date | null;
+  endAt: Date | null;
 };
 
 type BookingDraft = {
@@ -29,10 +30,6 @@ type ScheduleRow = {
   slot: PractitionerSlot;
   appointment: Appointment | null;
 };
-
-function toIsoUtc(localDateTimeValue: string): string {
-  return localDateTimeValue ? `${localDateTimeValue}:00Z` : '';
-}
 
 function formatTime(value: string): string {
   const date = new Date(value);
@@ -79,7 +76,7 @@ export function AgendaPage() {
   const [error, setError] = useState('');
   const [showSlotModal, setShowSlotModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [slotDraft, setSlotDraft] = useState<SlotDraft>({ practitionerId: '', startAtUtc: '', endAtUtc: '' });
+  const [slotDraft, setSlotDraft] = useState<SlotDraft>({ practitionerId: '', startAt: null, endAt: null });
   const [bookingDraft, setBookingDraft] = useState<BookingDraft>({ slotId: '', patientId: '' });
 
   const freeSlots = slots.filter((slot) => !slot.isBooked);
@@ -132,15 +129,21 @@ export function AgendaPage() {
 
   const handleCreateSlot = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!slotDraft.startAt || !slotDraft.endAt) {
+      return;
+    }
+
     setError('');
     setMessage('');
     try {
+      // toISOString convertit l'heure locale choisie en vrai UTC (l'ancien
+      // format "YYYY-MM-DDTHH:mm" + "Z" naif decalait l'heure affichee).
       await createSlot(auth, {
         practitionerId: slotDraft.practitionerId,
-        startAtUtc: toIsoUtc(slotDraft.startAtUtc),
-        endAtUtc: toIsoUtc(slotDraft.endAtUtc)
+        startAtUtc: slotDraft.startAt.toISOString(),
+        endAtUtc: slotDraft.endAt.toISOString()
       });
-      setSlotDraft({ practitionerId: '', startAtUtc: '', endAtUtc: '' });
+      setSlotDraft({ practitionerId: '', startAt: null, endAt: null });
       setShowSlotModal(false);
       await loadAll();
       setMessage('Disponibilite creee.');
@@ -266,25 +269,40 @@ export function AgendaPage() {
               </label>
               <label>
                 Debut
-                <input
-                  type="datetime-local"
-                  value={slotDraft.startAtUtc}
-                  onChange={(event) => setSlotDraft({ ...slotDraft, startAtUtc: event.target.value })}
+                <DateTimeField
+                  value={slotDraft.startAt}
+                  onChange={(startAt) =>
+                    setSlotDraft((current) => ({
+                      ...current,
+                      startAt,
+                      // Pre-remplit la fin a +30 min (duree seance kine standard) si vide.
+                      endAt:
+                        current.endAt ?? (startAt ? new Date(startAt.getTime() + 30 * 60 * 1000) : null)
+                    }))
+                  }
+                  showTime
+                  minDate={new Date()}
                 />
               </label>
               <label>
                 Fin
-                <input
-                  type="datetime-local"
-                  value={slotDraft.endAtUtc}
-                  onChange={(event) => setSlotDraft({ ...slotDraft, endAtUtc: event.target.value })}
+                <DateTimeField
+                  value={slotDraft.endAt}
+                  onChange={(endAt) => setSlotDraft({ ...slotDraft, endAt })}
+                  showTime
+                  minDate={slotDraft.startAt ?? new Date()}
                 />
               </label>
             </div>
             <button
               className="primary-button is-create"
               type="submit"
-              disabled={!slotDraft.practitionerId.trim() || !slotDraft.startAtUtc || !slotDraft.endAtUtc}
+              disabled={
+                !slotDraft.practitionerId.trim() ||
+                !slotDraft.startAt ||
+                !slotDraft.endAt ||
+                slotDraft.endAt <= slotDraft.startAt
+              }
             >
               Creer creneau
             </button>

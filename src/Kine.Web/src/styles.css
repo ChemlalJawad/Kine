@@ -427,6 +427,70 @@ button.list-item.active {
   color: #ab9f8c;
 }
 
+/* date/time picker (react-datepicker) aligned with the warm theme */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.datefield-input {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid #ece0cf;
+  border-radius: 0.9rem;
+  background: #fffdf9;
+  color: #3b332a;
+  font: inherit;
+}
+
+.datefield-input:focus-visible {
+  outline: 2px solid #3f6f5b;
+  outline-offset: 1px;
+}
+
+.react-datepicker {
+  font-family: inherit;
+  border: 1px solid #ece0cf;
+  border-radius: 1rem;
+  box-shadow: 0 12px 32px rgba(120, 90, 50, 0.16);
+  overflow: hidden;
+}
+
+.react-datepicker__header {
+  background: #fbf6ee;
+  border-bottom: 1px solid #ece0cf;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker__day-name {
+  color: #3b332a;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
+  background: #3f6f5b;
+  color: #fffdf9;
+}
+
+.react-datepicker__day:hover,
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
+  background: #e6efe9;
+}
+
+.react-datepicker__day--today {
+  font-weight: 700;
+  color: #3f6f5b;
+}
+
+.react-datepicker__close-icon::after {
+  background: #ab9f8c;
+}
+
+.react-datepicker-popper {
+  z-index: 60; /* above .modal-overlay (50) */
+}
+
 /* reporting monthly table */
 .report-row {
   display: grid;
