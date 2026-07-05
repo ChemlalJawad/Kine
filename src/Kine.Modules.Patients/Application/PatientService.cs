@@ -83,7 +83,7 @@ public sealed class PatientService
         RequireNonEmpty(lastName, nameof(lastName));
 
         var existing = _store.Get(tenantId, patientId)
-            ?? throw new InvalidOperationException($"Patient '{patientId}' not found for tenant '{tenantId}'.");
+            ?? throw new KeyNotFoundException($"Patient '{patientId}' not found for tenant '{tenantId}'.");
 
         var updated = existing with
         {
@@ -110,7 +110,7 @@ public sealed class PatientService
         RequireTenant(tenantId);
 
         var existing = _store.Get(tenantId, patientId)
-            ?? throw new InvalidOperationException($"Patient '{patientId}' not found for tenant '{tenantId}'.");
+            ?? throw new KeyNotFoundException($"Patient '{patientId}' not found for tenant '{tenantId}'.");
 
         var archived = existing with
         {
@@ -153,13 +153,12 @@ public sealed class PatientService
         return _store.GetContactsForPatient(tenantId, patientId);
     }
 
-    public PatientContact UpdateContact(string tenantId, Guid contactId, string value, bool isPrimary)
+    public PatientContact UpdateContact(string tenantId, Guid patientId, Guid contactId, string value, bool isPrimary)
     {
         RequireTenant(tenantId);
         RequireNonEmpty(value, nameof(value));
 
-        var existing = _store.GetContact(tenantId, contactId)
-            ?? throw new InvalidOperationException($"Contact '{contactId}' not found for tenant '{tenantId}'.");
+        var existing = GetOwnedContact(tenantId, patientId, contactId);
 
         var updated = existing with
         {
@@ -172,9 +171,14 @@ public sealed class PatientService
         return updated;
     }
 
-    public void RemoveContact(string tenantId, Guid contactId)
+    public void RemoveContact(string tenantId, Guid patientId, Guid contactId)
     {
         RequireTenant(tenantId);
+
+        // Existence + ownership are checked first so a delete on a missing or
+        // foreign contact yields 404 instead of a silent 204 with a phantom
+        // audit event written by the endpoint.
+        GetOwnedContact(tenantId, patientId, contactId);
         _store.RemoveContact(tenantId, contactId);
     }
 
@@ -207,12 +211,15 @@ public sealed class PatientService
     /// Revokes a previously granted consent. The record is kept (RevokedAtUtc set)
     /// rather than deleted, to preserve historique.
     /// </summary>
-    public PatientConsent RevokeConsent(string tenantId, Guid consentId)
+    public PatientConsent RevokeConsent(string tenantId, Guid patientId, Guid consentId)
     {
         RequireTenant(tenantId);
 
-        var existing = _store.GetConsent(tenantId, consentId)
-            ?? throw new InvalidOperationException($"Consent '{consentId}' not found for tenant '{tenantId}'.");
+        var existing = _store.GetConsent(tenantId, consentId);
+        if (existing is null || existing.PatientId != patientId)
+        {
+            throw new KeyNotFoundException($"Consent '{consentId}' not found for patient '{patientId}' in tenant '{tenantId}'.");
+        }
 
         var revoked = existing with
         {
@@ -234,8 +241,24 @@ public sealed class PatientService
     {
         if (_store.Get(tenantId, patientId) is null)
         {
-            throw new InvalidOperationException($"Patient '{patientId}' not found for tenant '{tenantId}'.");
+            throw new KeyNotFoundException($"Patient '{patientId}' not found for tenant '{tenantId}'.");
         }
+    }
+
+    /// <summary>
+    /// Loads a contact and verifies it belongs to the given patient. Throws
+    /// KeyNotFoundException otherwise, so route-level patient/contact mismatches
+    /// surface as 404 instead of silently acting on another patient's contact.
+    /// </summary>
+    private PatientContact GetOwnedContact(string tenantId, Guid patientId, Guid contactId)
+    {
+        var contact = _store.GetContact(tenantId, contactId);
+        if (contact is null || contact.PatientId != patientId)
+        {
+            throw new KeyNotFoundException($"Contact '{contactId}' not found for patient '{patientId}' in tenant '{tenantId}'.");
+        }
+
+        return contact;
     }
 
     private static void RequireTenant(string tenantId)

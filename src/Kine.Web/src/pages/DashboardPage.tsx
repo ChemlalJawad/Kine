@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { appointmentStatusBadgeClass, appointmentStatusLabels } from '../data/appointmentStatus';
 import { listPatients, type Patient } from '../api/patientsApi';
-import { listAppointments, type Appointment } from '../api/schedulingApi';
+import { listAppointments, listPractitioners, type Appointment, type Practitioner } from '../api/schedulingApi';
 import { formatMontant, listInvoices, type Invoice } from '../api/billingApi';
 
 const pendingInvoiceStatus = 0;
@@ -39,14 +39,16 @@ export function DashboardPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [practitioners, setPractitioners] = useState<Practitioner[]>([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    void Promise.all([listPatients(auth), listAppointments(auth), listInvoices(auth)])
-      .then(([loadedPatients, loadedAppointments, loadedInvoices]) => {
+    void Promise.all([listPatients(auth), listAppointments(auth), listInvoices(auth), listPractitioners(auth)])
+      .then(([loadedPatients, loadedAppointments, loadedInvoices, loadedPractitioners]) => {
         setPatients(loadedPatients);
         setAppointments(loadedAppointments);
         setInvoices(loadedInvoices);
+        setPractitioners(loadedPractitioners);
       })
       .catch((loadError) => setError(loadError.message));
   }, [auth]);
@@ -55,6 +57,11 @@ export function DashboardPage() {
   const todaysAppointments = appointments
     .filter((appointment) => isToday(appointment.startAtUtc))
     .sort((a, b) => a.startAtUtc.localeCompare(b.startAtUtc));
+
+  const practitionerName = (practitionerId: string) => {
+    const practitioner = practitioners.find((item) => item.id === practitionerId);
+    return practitioner ? `${practitioner.firstName} ${practitioner.lastName}` : practitionerId;
+  };
 
   const patientName = (patientId: string) => {
     const patient = patients.find((item) => item.id === patientId);
@@ -101,7 +108,7 @@ export function DashboardPage() {
                   <strong>{patientName(appointment.patientId)}</strong>
                   <p className="muted compact">
                     {formatTime(appointment.startAtUtc)} – {formatTime(appointment.endAtUtc)} &middot;{' '}
-                    {appointment.practitionerId}
+                    {practitionerName(appointment.practitionerId)}
                   </p>
                 </div>
                 <span className={appointmentStatusBadgeClass[appointment.status]}>

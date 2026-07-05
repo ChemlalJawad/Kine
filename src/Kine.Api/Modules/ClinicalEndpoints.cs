@@ -34,18 +34,41 @@ public static class ClinicalEndpoints
             AuditTrailService audit,
             HttpContext context) =>
         {
-            try
-            {
-                var seance = service.CreateSeance(
-                    Tenant(context), patientId, request.DateSeanceUtc, request.Note, Actor(context), request.AppointmentId);
-                audit.Record(Tenant(context), Actor(context), "seance_created", "SeanceClinique", seance.Id.ToString(),
-                    $"patient={patientId}");
-                return Results.Created($"/api/clinical/patients/{patientId}/seances/{seance.Id}", seance);
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
+            // Erreurs mappees par ExceptionMappingMiddleware: 400 (invalide),
+            // 404 (prescription inconnue/autre patient), 409 (expiree/quota).
+            var seance = service.CreateSeance(
+                Tenant(context), patientId, request.DateSeanceUtc, request.Note, Actor(context), request.AppointmentId, request.PrescriptionId);
+            audit.Record(Tenant(context), Actor(context), "seance_created", "SeanceClinique", seance.Id.ToString(),
+                $"patient={patientId}" + (request.PrescriptionId is Guid p ? $"; prescription={p}" : string.Empty));
+            return Results.Created($"/api/clinical/patients/{patientId}/seances/{seance.Id}", seance);
+        });
+
+        // ----- Prescriptions (F-A4) -----
+
+        group.MapGet("/patients/{patientId:guid}/prescriptions", (Guid patientId, ClinicalService service, HttpContext context) =>
+        {
+            return Results.Ok(service.ListPrescriptions(Tenant(context), patientId));
+        });
+
+        group.MapPost("/patients/{patientId:guid}/prescriptions", (
+            Guid patientId,
+            CreatePrescriptionRequest request,
+            ClinicalService service,
+            AuditTrailService audit,
+            HttpContext context) =>
+        {
+            var prescription = service.CreatePrescription(
+                Tenant(context),
+                patientId,
+                request.PrescriberName,
+                request.PrescriberInami,
+                request.PrescribedAtUtc,
+                request.Diagnosis,
+                request.SessionsPrescribed,
+                Actor(context));
+            audit.Record(Tenant(context), Actor(context), "prescription_created", "Prescription", prescription.Id.ToString(),
+                $"patient={patientId}; sessions={request.SessionsPrescribed}");
+            return Results.Created($"/api/clinical/patients/{patientId}/prescriptions/{prescription.Id}", prescription);
         });
     }
 

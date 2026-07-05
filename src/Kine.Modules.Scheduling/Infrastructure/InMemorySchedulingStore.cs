@@ -13,8 +13,38 @@ namespace Kine.Modules.Scheduling.Infrastructure;
 public sealed class InMemorySchedulingStore : ISchedulingStore
 {
     private readonly object _lock = new();
+    private readonly Dictionary<string, Dictionary<Guid, Practitioner>> _practitionersByTenant = new();
     private readonly Dictionary<string, Dictionary<Guid, PractitionerSlot>> _slotsByTenant = new();
     private readonly Dictionary<string, Dictionary<Guid, Appointment>> _appointmentsByTenant = new();
+
+    public void AddPractitioner(Practitioner practitioner)
+    {
+        lock (_lock)
+        {
+            var practitioners = GetOrCreate(_practitionersByTenant, practitioner.TenantId);
+            practitioners[practitioner.Id] = practitioner;
+        }
+    }
+
+    public Practitioner? GetPractitioner(string tenantId, Guid practitionerId)
+    {
+        lock (_lock)
+        {
+            return _practitionersByTenant.TryGetValue(tenantId, out var practitioners) && practitioners.TryGetValue(practitionerId, out var practitioner)
+                ? practitioner
+                : null;
+        }
+    }
+
+    public IReadOnlyList<Practitioner> GetAllPractitioners(string tenantId)
+    {
+        lock (_lock)
+        {
+            return _practitionersByTenant.TryGetValue(tenantId, out var practitioners)
+                ? practitioners.Values.ToList()
+                : Array.Empty<Practitioner>();
+        }
+    }
 
     public void AddSlot(PractitionerSlot slot)
     {
@@ -51,6 +81,32 @@ public sealed class InMemorySchedulingStore : ISchedulingStore
         {
             var slots = GetOrCreate(_slotsByTenant, slot.TenantId);
             slots[slot.Id] = slot;
+        }
+    }
+
+    public SlotReservationResult TryReserveSlot(string tenantId, Guid slotId, DateTime nowUtc, out PractitionerSlot? reservedSlot)
+    {
+        // Check-and-set under the store lock: the read of IsBooked and the write
+        // of the reserved slot are one atomic step, closing the double-booking
+        // window that existed when callers did GetSlot / check / UpdateSlot.
+        lock (_lock)
+        {
+            reservedSlot = null;
+
+            if (!_slotsByTenant.TryGetValue(tenantId, out var slots) || !slots.TryGetValue(slotId, out var slot))
+            {
+                return SlotReservationResult.NotFound;
+            }
+
+            if (slot.IsBooked)
+            {
+                return SlotReservationResult.AlreadyBooked;
+            }
+
+            var updated = slot with { IsBooked = true, UpdatedAtUtc = nowUtc };
+            slots[slotId] = updated;
+            reservedSlot = updated;
+            return SlotReservationResult.Reserved;
         }
     }
 

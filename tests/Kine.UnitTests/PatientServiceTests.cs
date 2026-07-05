@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Kine.Modules.Patients.Application;
 using Kine.Modules.Patients.Domain;
@@ -61,7 +62,7 @@ public class PatientServiceTests
     {
         var service = CreateService();
 
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<KeyNotFoundException>(() =>
             service.UpdatePatient("tenant-a", Guid.NewGuid(), "Jean", "Dupont", null));
     }
 
@@ -82,7 +83,7 @@ public class PatientServiceTests
     {
         var service = CreateService();
 
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<KeyNotFoundException>(() =>
             service.AddContact("tenant-a", Guid.NewGuid(), PatientContactType.Phone, "+32123456", true, "staff-1"));
     }
 
@@ -106,7 +107,7 @@ public class PatientServiceTests
         var patient = service.CreatePatient("tenant-a", "Jean", "Dupont", null, "staff-1");
         var contact = service.AddContact("tenant-a", patient.Id, PatientContactType.Phone, "+32100000", false, "staff-1");
 
-        var updated = service.UpdateContact("tenant-a", contact.Id, "+32199999", true);
+        var updated = service.UpdateContact("tenant-a", patient.Id, contact.Id, "+32199999", true);
 
         Assert.Equal("+32199999", updated.Value);
         Assert.True(updated.IsPrimary);
@@ -119,9 +120,43 @@ public class PatientServiceTests
         var patient = service.CreatePatient("tenant-a", "Jean", "Dupont", null, "staff-1");
         var contact = service.AddContact("tenant-a", patient.Id, PatientContactType.Phone, "+32100000", false, "staff-1");
 
-        service.RemoveContact("tenant-a", contact.Id);
+        service.RemoveContact("tenant-a", patient.Id, contact.Id);
 
         Assert.Empty(service.ListContacts("tenant-a", patient.Id));
+    }
+
+    [Fact]
+    public void UpdateContact_throws_not_found_when_contact_belongs_to_another_patient()
+    {
+        var service = CreateService();
+        var patientA = service.CreatePatient("tenant-a", "Jean", "Dupont", null, "staff-1");
+        var patientB = service.CreatePatient("tenant-a", "Marie", "Curie", null, "staff-1");
+        var contactOfB = service.AddContact("tenant-a", patientB.Id, PatientContactType.Phone, "+32100000", false, "staff-1");
+
+        Assert.Throws<KeyNotFoundException>(() =>
+            service.UpdateContact("tenant-a", patientA.Id, contactOfB.Id, "+32199999", true));
+    }
+
+    [Fact]
+    public void RemoveContact_throws_not_found_when_contact_does_not_exist()
+    {
+        var service = CreateService();
+        var patient = service.CreatePatient("tenant-a", "Jean", "Dupont", null, "staff-1");
+
+        Assert.Throws<KeyNotFoundException>(() =>
+            service.RemoveContact("tenant-a", patient.Id, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void RevokeConsent_throws_not_found_when_consent_belongs_to_another_patient()
+    {
+        var service = CreateService();
+        var patientA = service.CreatePatient("tenant-a", "Jean", "Dupont", null, "staff-1");
+        var patientB = service.CreatePatient("tenant-a", "Marie", "Curie", null, "staff-1");
+        var consentOfB = service.RecordConsent("tenant-a", patientB.Id, ConsentType.TraitementDonnees, true, "staff-1");
+
+        Assert.Throws<KeyNotFoundException>(() =>
+            service.RevokeConsent("tenant-a", patientA.Id, consentOfB.Id));
     }
 
     [Fact]
@@ -129,7 +164,7 @@ public class PatientServiceTests
     {
         var service = CreateService();
 
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<KeyNotFoundException>(() =>
             service.RecordConsent("tenant-a", Guid.NewGuid(), ConsentType.TraitementDonnees, true, "staff-1"));
     }
 
@@ -142,7 +177,7 @@ public class PatientServiceTests
         var consent = service.RecordConsent("tenant-a", patient.Id, ConsentType.PartageDossier, true, "staff-1");
         Assert.Null(consent.RevokedAtUtc);
 
-        var revoked = service.RevokeConsent("tenant-a", consent.Id);
+        var revoked = service.RevokeConsent("tenant-a", patient.Id, consent.Id);
 
         Assert.NotNull(revoked.RevokedAtUtc);
         Assert.True(revoked.Granted);

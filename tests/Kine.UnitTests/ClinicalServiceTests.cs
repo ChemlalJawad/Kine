@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Kine.Modules.Clinical.Application;
 using Kine.Modules.Clinical.Infrastructure;
@@ -11,7 +12,7 @@ public class ClinicalServiceTests
     private const string TenantId = "tenant-001";
     private const string Actor = "staff-1";
 
-    private static ClinicalService CreateService() => new(new InMemorySeanceStore());
+    private static ClinicalService CreateService() => new(new InMemorySeanceStore(), new InMemoryPrescriptionStore());
 
     [Fact]
     public void Create_seance_persists_and_counts()
@@ -100,5 +101,78 @@ public class ClinicalServiceTests
         var seance = service.CreateSeance(TenantId, Guid.NewGuid(), DateTime.UtcNow, null, Actor, appointmentId);
 
         Assert.Equal(appointmentId, seance.AppointmentId);
+    }
+
+    // ----- Prescriptions (F-A4) -----
+
+    [Fact]
+    public void CreatePrescription_computes_two_month_validity()
+    {
+        var service = CreateService();
+        var patientId = Guid.NewGuid();
+        var prescribedAt = new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        var prescription = service.CreatePrescription(TenantId, patientId, "Dr Anne Willems", null, prescribedAt, "Lombalgie", 9, Actor);
+
+        Assert.Equal(prescribedAt.AddMonths(2), prescription.ValidUntilUtc);
+        Assert.Equal(9, prescription.SessionsPrescribed);
+    }
+
+    [Fact]
+    public void CreatePrescription_rejects_non_positive_sessions()
+    {
+        var service = CreateService();
+
+        Assert.Throws<ArgumentException>(() =>
+            service.CreatePrescription(TenantId, Guid.NewGuid(), "Dr Anne Willems", null, DateTime.UtcNow, null, 0, Actor));
+    }
+
+    [Fact]
+    public void ListPrescriptions_reports_usage_and_remaining()
+    {
+        var service = CreateService();
+        var patientId = Guid.NewGuid();
+        var prescription = service.CreatePrescription(TenantId, patientId, "Dr Anne Willems", null, DateTime.UtcNow.AddDays(-10), null, 3, Actor);
+
+        service.CreateSeance(TenantId, patientId, DateTime.UtcNow, null, Actor, prescriptionId: prescription.Id);
+
+        var usage = Assert.Single(service.ListPrescriptions(TenantId, patientId));
+        Assert.Equal(1, usage.SeancesUsed);
+        Assert.Equal(2, usage.SeancesRemaining);
+        Assert.False(usage.IsExpired);
+    }
+
+    [Fact]
+    public void CreateSeance_rejects_seance_beyond_prescription_quota()
+    {
+        var service = CreateService();
+        var patientId = Guid.NewGuid();
+        var prescription = service.CreatePrescription(TenantId, patientId, "Dr Anne Willems", null, DateTime.UtcNow.AddDays(-5), null, 1, Actor);
+
+        service.CreateSeance(TenantId, patientId, DateTime.UtcNow, null, Actor, prescriptionId: prescription.Id);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            service.CreateSeance(TenantId, patientId, DateTime.UtcNow, null, Actor, prescriptionId: prescription.Id));
+    }
+
+    [Fact]
+    public void CreateSeance_rejects_seance_after_prescription_expiry()
+    {
+        var service = CreateService();
+        var patientId = Guid.NewGuid();
+        var prescription = service.CreatePrescription(TenantId, patientId, "Dr Anne Willems", null, DateTime.UtcNow.AddMonths(-3), null, 9, Actor);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            service.CreateSeance(TenantId, patientId, DateTime.UtcNow, null, Actor, prescriptionId: prescription.Id));
+    }
+
+    [Fact]
+    public void CreateSeance_rejects_prescription_of_another_patient()
+    {
+        var service = CreateService();
+        var prescription = service.CreatePrescription(TenantId, Guid.NewGuid(), "Dr Anne Willems", null, DateTime.UtcNow, null, 9, Actor);
+
+        Assert.Throws<KeyNotFoundException>(() =>
+            service.CreateSeance(TenantId, Guid.NewGuid(), DateTime.UtcNow, null, Actor, prescriptionId: prescription.Id));
     }
 }

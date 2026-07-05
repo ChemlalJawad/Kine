@@ -21,7 +21,14 @@ import {
   type PatientConsent
 } from '../api/patientsApi';
 import { listAppointments, type Appointment } from '../api/schedulingApi';
-import { createSeance, listSeances, type Seance } from '../api/clinicalApi';
+import {
+  createPrescription,
+  createSeance,
+  listPrescriptions,
+  listSeances,
+  type PrescriptionUsage,
+  type Seance
+} from '../api/clinicalApi';
 
 const phoneContactType: PatientContactType = 0;
 const completedAppointmentStatus = 3;
@@ -89,18 +96,31 @@ export function PatientsPage() {
   const [contacts, setContacts] = useState<PatientContact[]>([]);
   const [consents, setConsents] = useState<PatientConsent[]>([]);
   const [seances, setSeances] = useState<Seance[]>([]);
+  const [prescriptions, setPrescriptions] = useState<PrescriptionUsage[]>([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSeanceModal, setShowSeanceModal] = useState(false);
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [draft, setDraft] = useState<Draft>({ firstName: '', lastName: '', dateOfBirth: null, mutuelle: '', diagnosis: '' });
   const [contactDraft, setContactDraft] = useState({ type: 0 as PatientContactType, value: '', isPrimary: false });
   const [consentDraft, setConsentDraft] = useState({ type: 0 as ConsentType, granted: true });
-  const [seanceDraft, setSeanceDraft] = useState<{ dateSeance: Date | null; note: string }>({
+  const [seanceDraft, setSeanceDraft] = useState<{ dateSeance: Date | null; note: string; prescriptionId: string }>({
     dateSeance: new Date(),
-    note: ''
+    note: '',
+    prescriptionId: ''
   });
+  const [prescriptionDraft, setPrescriptionDraft] = useState<{
+    prescriberName: string;
+    prescriberInami: string;
+    prescribedAt: Date | null;
+    diagnosis: string;
+    sessions: string;
+  }>({ prescriberName: '', prescriberInami: '', prescribedAt: new Date(), diagnosis: '', sessions: '9' });
+
+  // F-A4 : prescriptions imputables a une nouvelle seance (valides et non epuisees).
+  const activePrescriptions = prescriptions.filter((usage) => !usage.isExpired && usage.seancesRemaining > 0);
 
   const selectedPatient = patients.find((patient) => patient.id === selectedPatientId) ?? null;
 
@@ -144,14 +164,16 @@ export function PatientsPage() {
   };
 
   const loadDetails = async (patientId: string) => {
-    const [loadedContacts, loadedConsents, loadedSeances] = await Promise.all([
+    const [loadedContacts, loadedConsents, loadedSeances, loadedPrescriptions] = await Promise.all([
       listPatientContacts(auth, patientId),
       listPatientConsents(auth, patientId),
-      listSeances(auth, patientId)
+      listSeances(auth, patientId),
+      listPrescriptions(auth, patientId)
     ]);
     setContacts(loadedContacts);
     setConsents(loadedConsents);
     setSeances(loadedSeances);
+    setPrescriptions(loadedPrescriptions);
   };
 
   useEffect(() => {
@@ -167,6 +189,7 @@ export function PatientsPage() {
       setContacts([]);
       setConsents([]);
       setSeances([]);
+      setPrescriptions([]);
       return;
     }
 
@@ -206,14 +229,40 @@ export function PatientsPage() {
     try {
       await createSeance(auth, selectedPatient.id, {
         dateSeanceUtc: (seanceDraft.dateSeance ?? new Date()).toISOString(),
-        note: seanceDraft.note || null
+        note: seanceDraft.note || null,
+        prescriptionId: seanceDraft.prescriptionId || null
       });
-      setSeanceDraft({ dateSeance: new Date(), note: '' });
+      setSeanceDraft({ dateSeance: new Date(), note: '', prescriptionId: '' });
       setShowSeanceModal(false);
       await loadDetails(selectedPatient.id);
       setMessage('Seance enregistree.');
     } catch (seanceError) {
       setError((seanceError as Error).message);
+    }
+  };
+
+  const handleCreatePrescription = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedPatient) {
+      return;
+    }
+
+    setError('');
+    setMessage('');
+    try {
+      await createPrescription(auth, selectedPatient.id, {
+        prescriberName: prescriptionDraft.prescriberName,
+        prescriberInami: prescriptionDraft.prescriberInami.trim() || null,
+        prescribedAtUtc: (prescriptionDraft.prescribedAt ?? new Date()).toISOString(),
+        diagnosis: prescriptionDraft.diagnosis.trim() || null,
+        sessionsPrescribed: Number(prescriptionDraft.sessions)
+      });
+      setPrescriptionDraft({ prescriberName: '', prescriberInami: '', prescribedAt: new Date(), diagnosis: '', sessions: '9' });
+      setShowPrescriptionModal(false);
+      await loadDetails(selectedPatient.id);
+      setMessage('Prescription enregistree.');
+    } catch (prescriptionError) {
+      setError((prescriptionError as Error).message);
     }
   };
 
@@ -464,11 +513,51 @@ export function PatientsPage() {
                   <button className="ghost-button" type="button" onClick={() => setShowSeanceModal(true)}>
                     + Ajouter une seance
                   </button>
+                  <button className="ghost-button" type="button" onClick={() => setShowPrescriptionModal(true)}>
+                    + Prescription
+                  </button>
                   <button className="ghost-button" type="button" onClick={() => setShowEditModal(true)}>
                     Modifier
                   </button>
                 </div>
               </div>
+
+              <section className="subpanel">
+                <h4>Prescriptions ({prescriptions.length})</h4>
+                {prescriptions.length === 0 ? (
+                  <p className="muted compact">
+                    Aucune prescription. Le remboursement INAMI exige une prescription medicale valide (2 mois).
+                  </p>
+                ) : (
+                  <div className="list">
+                    {prescriptions.map((usage) => {
+                      const quotaReached = usage.seancesRemaining === 0;
+                      const badgeClass = usage.isExpired
+                        ? 'badge badge-danger'
+                        : quotaReached
+                          ? 'badge badge-warning'
+                          : 'badge badge-success';
+                      const badgeLabel = usage.isExpired ? 'Expiree' : quotaReached ? 'Quota atteint' : 'Valide';
+                      return (
+                        <div key={usage.prescription.id} className="list-item">
+                          <div style={{ flex: 1 }}>
+                            <strong>
+                              {usage.prescription.prescriberName} · {usage.prescription.sessionsPrescribed} seances
+                            </strong>
+                            <p className="muted compact">
+                              Prescrite le {formatDate(usage.prescription.prescribedAtUtc)} · valide jusqu'au{' '}
+                              {formatDate(usage.prescription.validUntilUtc)} · {usage.seancesUsed} utilisee(s),{' '}
+                              {usage.seancesRemaining} restante(s)
+                              {usage.prescription.diagnosis ? ` · ${usage.prescription.diagnosis}` : ''}
+                            </p>
+                          </div>
+                          <span className={badgeClass}>{badgeLabel}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
 
               <section className="subpanel">
                 <h4>Seances ({seances.length})</h4>
@@ -696,6 +785,20 @@ export function PatientsPage() {
                   onChange={(event) => setSeanceDraft({ ...seanceDraft, note: event.target.value })}
                 />
               </label>
+              <label>
+                Prescription (optionnel)
+                <select
+                  value={seanceDraft.prescriptionId}
+                  onChange={(event) => setSeanceDraft({ ...seanceDraft, prescriptionId: event.target.value })}
+                >
+                  <option value="">Sans imputation</option>
+                  {activePrescriptions.map((usage) => (
+                    <option key={usage.prescription.id} value={usage.prescription.id}>
+                      {usage.prescription.prescriberName} · {usage.seancesRemaining} seance(s) restante(s)
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
             <p className="muted compact">
               La seance est enregistree dans le dossier clinique (tracee et auditee); la progression du patient est
@@ -703,6 +806,70 @@ export function PatientsPage() {
             </p>
             <button className="primary-button is-create" type="submit" disabled={!seanceDraft.dateSeance}>
               Enregistrer la seance
+            </button>
+          </form>
+        </Modal>
+      ) : null}
+
+      {showPrescriptionModal && selectedPatient ? (
+        <Modal title="Nouvelle prescription" onClose={() => setShowPrescriptionModal(false)}>
+          <form className="stack" onSubmit={handleCreatePrescription}>
+            <div className="form-grid">
+              <label>
+                Medecin prescripteur
+                <input
+                  value={prescriptionDraft.prescriberName}
+                  placeholder="Ex: Dr Anne Willems"
+                  onChange={(event) => setPrescriptionDraft({ ...prescriptionDraft, prescriberName: event.target.value })}
+                />
+              </label>
+              <label>
+                Numero INAMI du medecin (optionnel)
+                <input
+                  value={prescriptionDraft.prescriberInami}
+                  onChange={(event) => setPrescriptionDraft({ ...prescriptionDraft, prescriberInami: event.target.value })}
+                />
+              </label>
+              <label>
+                Date de prescription
+                <DateTimeField
+                  value={prescriptionDraft.prescribedAt}
+                  onChange={(prescribedAt) => setPrescriptionDraft({ ...prescriptionDraft, prescribedAt })}
+                  maxDate={new Date()}
+                />
+              </label>
+              <label>
+                Nombre de seances
+                <input
+                  type="number"
+                  min={1}
+                  value={prescriptionDraft.sessions}
+                  onChange={(event) => setPrescriptionDraft({ ...prescriptionDraft, sessions: event.target.value })}
+                />
+              </label>
+              <label>
+                Diagnostic (optionnel)
+                <input
+                  value={prescriptionDraft.diagnosis}
+                  placeholder="Ex: Lombalgie chronique"
+                  onChange={(event) => setPrescriptionDraft({ ...prescriptionDraft, diagnosis: event.target.value })}
+                />
+              </label>
+            </div>
+            <p className="muted compact">
+              Validite INAMI : 2 mois a compter de la date de prescription. Les seances imputees au-dela du quota ou
+              hors validite seront refusees.
+            </p>
+            <button
+              className="primary-button is-create"
+              type="submit"
+              disabled={
+                !prescriptionDraft.prescriberName.trim() ||
+                !prescriptionDraft.prescribedAt ||
+                !(Number(prescriptionDraft.sessions) > 0)
+              }
+            >
+              Enregistrer la prescription
             </button>
           </form>
         </Modal>

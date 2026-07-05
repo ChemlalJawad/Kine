@@ -106,4 +106,57 @@ public class PatientsEndpointTests
         var revokeResponse = await client.PostAsync($"/api/patients/{patient.Id}/consents/{consent!.Id}/revoke", content: null);
         Assert.Equal(HttpStatusCode.OK, revokeResponse.StatusCode);
     }
+
+    [Fact]
+    public async Task Create_patient_with_empty_first_name_returns_400_not_500()
+    {
+        // Regression P0-016: ArgumentException from the service used to escape
+        // the endpoint (only InvalidOperationException was caught) -> 500.
+        await using var factory = CreateFactory();
+        using var client = CreateTenantClient(factory);
+
+        var response = await client.PostAsJsonAsync("/api/patients", new CreatePatientRequest("", "Dupont", null));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Update_contact_of_another_patient_returns_404()
+    {
+        // Regression P0-017: the patient id in the route was ignored, so a
+        // contact belonging to another patient (same tenant) was modifiable
+        // and the audit trail recorded a wrong patient reference.
+        await using var factory = CreateFactory();
+        using var client = CreateTenantClient(factory);
+
+        var patientAResponse = await client.PostAsJsonAsync("/api/patients", new CreatePatientRequest("Jean", "Dupont", null));
+        var patientA = await patientAResponse.Content.ReadFromJsonAsync<Patient>();
+        var patientBResponse = await client.PostAsJsonAsync("/api/patients", new CreatePatientRequest("Marie", "Curie", null));
+        var patientB = await patientBResponse.Content.ReadFromJsonAsync<Patient>();
+
+        var contactResponse = await client.PostAsJsonAsync($"/api/patients/{patientB!.Id}/contacts",
+            new CreatePatientContactRequest(PatientContactType.Phone, "+32100000", true));
+        var contactOfB = await contactResponse.Content.ReadFromJsonAsync<PatientContact>();
+
+        var crossPatientUpdate = await client.PutAsJsonAsync($"/api/patients/{patientA!.Id}/contacts/{contactOfB!.Id}",
+            new UpdatePatientContactRequest("+32199999", false));
+
+        Assert.Equal(HttpStatusCode.NotFound, crossPatientUpdate.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_missing_contact_returns_404_without_phantom_audit_event()
+    {
+        // Regression P0-017: deleting a nonexistent contact used to return 204
+        // and still write an audit event.
+        await using var factory = CreateFactory();
+        using var client = CreateTenantClient(factory);
+
+        var createResponse = await client.PostAsJsonAsync("/api/patients", new CreatePatientRequest("Jean", "Dupont", null));
+        var patient = await createResponse.Content.ReadFromJsonAsync<Patient>();
+
+        var deleteResponse = await client.DeleteAsync($"/api/patients/{patient!.Id}/contacts/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, deleteResponse.StatusCode);
+    }
 }

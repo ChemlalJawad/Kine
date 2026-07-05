@@ -24,6 +24,15 @@ public class SchedulingEndpointTests
         return client;
     }
 
+    /// <summary>F-B2: les slots exigent un praticien enregistre; cree via l'API.</summary>
+    private static async Task<string> CreatePractitionerId(HttpClient client)
+    {
+        var response = await client.PostAsJsonAsync("/api/scheduling/practitioners",
+            new CreatePractitionerRequest("Julie", "Peeters", null));
+        var practitioner = await response.Content.ReadFromJsonAsync<Practitioner>();
+        return practitioner!.Id.ToString();
+    }
+
     [Fact]
     public async Task Scheduling_endpoints_reject_requests_without_tenant()
     {
@@ -41,7 +50,7 @@ public class SchedulingEndpointTests
         await using var factory = CreateFactory();
         using var client = CreateTenantClient(factory);
 
-        var slotResponse = await client.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest("prat-1", Start, End));
+        var slotResponse = await client.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest(await CreatePractitionerId(client), Start, End));
         Assert.Equal(HttpStatusCode.Created, slotResponse.StatusCode);
         var slot = await slotResponse.Content.ReadFromJsonAsync<PractitionerSlot>();
 
@@ -62,7 +71,7 @@ public class SchedulingEndpointTests
         await using var factory = CreateFactory();
         using var client = CreateTenantClient(factory);
 
-        var slotResponse = await client.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest("prat-1", Start, End));
+        var slotResponse = await client.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest(await CreatePractitionerId(client), Start, End));
         var slot = await slotResponse.Content.ReadFromJsonAsync<PractitionerSlot>();
 
         await client.PostAsJsonAsync("/api/scheduling/appointments", new BookAppointmentRequest(slot!.Id, Guid.NewGuid()));
@@ -77,7 +86,7 @@ public class SchedulingEndpointTests
         await using var factory = CreateFactory();
         using var client = CreateTenantClient(factory);
 
-        var slotResponse = await client.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest("prat-1", Start, End));
+        var slotResponse = await client.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest(await CreatePractitionerId(client), Start, End));
         var slot = await slotResponse.Content.ReadFromJsonAsync<PractitionerSlot>();
 
         var bookResponse = await client.PostAsJsonAsync("/api/scheduling/appointments", new BookAppointmentRequest(slot!.Id, Guid.NewGuid()));
@@ -96,7 +105,7 @@ public class SchedulingEndpointTests
         await using var factory = CreateFactory();
         using var client = CreateTenantClient(factory);
 
-        var slotResponse = await client.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest("prat-1", Start, End));
+        var slotResponse = await client.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest(await CreatePractitionerId(client), Start, End));
         var slot = await slotResponse.Content.ReadFromJsonAsync<PractitionerSlot>();
 
         var bookResponse = await client.PostAsJsonAsync("/api/scheduling/appointments", new BookAppointmentRequest(slot!.Id, Guid.NewGuid()));
@@ -116,7 +125,7 @@ public class SchedulingEndpointTests
         using var clientA = CreateTenantClient(factory, "tenant-a");
         using var clientB = CreateTenantClient(factory, "tenant-b");
 
-        var slotResponse = await clientA.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest("prat-1", Start, End));
+        var slotResponse = await clientA.PostAsJsonAsync("/api/scheduling/slots", new CreateSlotRequest(await CreatePractitionerId(clientA), Start, End));
         var slot = await slotResponse.Content.ReadFromJsonAsync<PractitionerSlot>();
 
         var bookResponse = await clientA.PostAsJsonAsync("/api/scheduling/appointments", new BookAppointmentRequest(slot!.Id, Guid.NewGuid()));

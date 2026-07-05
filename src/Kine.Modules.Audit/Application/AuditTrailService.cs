@@ -32,26 +32,26 @@ public sealed class AuditTrailService
         var tsUtc = DateTime.UtcNow;
         var payloadHash = AuditHash.HashPayload(payload);
 
-        var chain = _store.GetChain(tenantId);
-        var prevHash = chain.Count > 0 ? chain[^1].EventHash : AuditHash.GenesisHash;
-
-        var eventHash = AuditHash.ComputeEventHash(id, tenantId, actorId, action, entity, entityId, tsUtc, payloadHash, prevHash);
-
-        var auditEvent = new AuditEvent
+        // Hash computation happens inside the store's atomic append: the store
+        // provides the authoritative prev hash while holding its lock, so
+        // concurrent Record calls can never chain onto the same predecessor.
+        return _store.AppendWithChain(tenantId, prevHash =>
         {
-            Id = id,
-            TenantId = tenantId,
-            ActorId = actorId,
-            Action = action,
-            Entity = entity,
-            EntityId = entityId,
-            TsUtc = tsUtc,
-            PayloadHash = payloadHash,
-            PrevHash = prevHash,
-            EventHash = eventHash
-        };
+            var eventHash = AuditHash.ComputeEventHash(id, tenantId, actorId, action, entity, entityId, tsUtc, payloadHash, prevHash);
 
-        _store.Append(auditEvent);
-        return auditEvent;
+            return new AuditEvent
+            {
+                Id = id,
+                TenantId = tenantId,
+                ActorId = actorId,
+                Action = action,
+                Entity = entity,
+                EntityId = entityId,
+                TsUtc = tsUtc,
+                PayloadHash = payloadHash,
+                PrevHash = prevHash,
+                EventHash = eventHash
+            };
+        });
     }
 }

@@ -19,6 +19,9 @@ public sealed record SeanceClinique
     /// <summary>Rendez-vous d'origine si la seance decoule d'un rdv agenda (id opaque, module Scheduling).</summary>
     public Guid? AppointmentId { get; init; }
 
+    /// <summary>Prescription medicale a laquelle la seance est imputee (F-A4, optionnel au MVP).</summary>
+    public Guid? PrescriptionId { get; init; }
+
     /// <summary>Date/heure de realisation de la seance.</summary>
     public required DateTime DateSeanceUtc { get; init; }
 

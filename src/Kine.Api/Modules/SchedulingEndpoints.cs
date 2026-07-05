@@ -24,6 +24,20 @@ public static class SchedulingEndpoints
     {
         var group = app.MapGroup("/api/scheduling");
 
+        // F-B2 multi-praticiens: registre des kines du cabinet. Erreurs mappees
+        // par ExceptionMappingMiddleware (400/404/409).
+        group.MapPost("/practitioners", (CreatePractitionerRequest request, SchedulingService service, AuditTrailService audit, HttpContext context) =>
+        {
+            var practitioner = service.CreatePractitioner(Tenant(context), request.FirstName, request.LastName, request.InamiNumber, Actor(context));
+            audit.Record(Tenant(context), Actor(context), "practitioner_created", "Practitioner", practitioner.Id.ToString());
+            return Results.Created($"/api/scheduling/practitioners/{practitioner.Id}", practitioner);
+        });
+
+        group.MapGet("/practitioners", (SchedulingService service, HttpContext context) =>
+        {
+            return Results.Ok(service.ListPractitioners(Tenant(context)));
+        });
+
         group.MapPost("/slots", (CreateSlotRequest request, SchedulingService service, AuditTrailService audit, HttpContext context) =>
         {
             try

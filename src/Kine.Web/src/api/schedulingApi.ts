@@ -28,6 +28,31 @@ export type Appointment = {
   createdBy: string;
 };
 
+export type Practitioner = {
+  id: string;
+  tenantId: string;
+  firstName: string;
+  lastName: string;
+  inamiNumber: string | null;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  createdBy: string;
+};
+
+export function listPractitioners(auth: AuthHeaders) {
+  return requestJson<Practitioner[]>('/api/scheduling/practitioners', { method: 'GET' }, auth);
+}
+
+export function createPractitioner(
+  auth: AuthHeaders,
+  payload: { firstName: string; lastName: string; inamiNumber?: string | null }
+) {
+  return requestJson<Practitioner>('/api/scheduling/practitioners', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }, auth);
+}
+
 export function listSlots(auth: AuthHeaders) {
   return requestJson<PractitionerSlot[]>('/api/scheduling/slots', { method: 'GET' }, auth);
 }

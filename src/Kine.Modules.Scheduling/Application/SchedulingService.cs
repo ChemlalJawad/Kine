@@ -18,11 +18,48 @@ public sealed class SchedulingService
         _store = store ?? throw new ArgumentNullException(nameof(store));
     }
 
+    public Practitioner CreatePractitioner(string tenantId, string firstName, string lastName, string? inamiNumber, string createdBy)
+    {
+        RequireTenant(tenantId);
+        RequireNonEmpty(firstName, nameof(firstName));
+        RequireNonEmpty(lastName, nameof(lastName));
+        RequireNonEmpty(createdBy, nameof(createdBy));
+
+        var now = DateTime.UtcNow;
+        var practitioner = new Practitioner
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            FirstName = firstName,
+            LastName = lastName,
+            InamiNumber = string.IsNullOrWhiteSpace(inamiNumber) ? null : inamiNumber,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            CreatedBy = createdBy
+        };
+
+        _store.AddPractitioner(practitioner);
+        return practitioner;
+    }
+
+    public IReadOnlyList<Practitioner> ListPractitioners(string tenantId)
+    {
+        RequireTenant(tenantId);
+        return _store.GetAllPractitioners(tenantId);
+    }
+
     public PractitionerSlot CreateSlot(string tenantId, string practitionerId, DateTime startAtUtc, DateTime endAtUtc, string createdBy)
     {
         RequireTenant(tenantId);
         RequireNonEmpty(practitionerId, nameof(practitionerId));
         RequireNonEmpty(createdBy, nameof(createdBy));
+
+        // F-B2: a slot must belong to a registered practitioner of the cabinet.
+        if (!Guid.TryParse(practitionerId, out var practitionerGuid) ||
+            _store.GetPractitioner(tenantId, practitionerGuid) is null)
+        {
+            throw new KeyNotFoundException($"Practitioner '{practitionerId}' not found for tenant '{tenantId}'.");
+        }
 
         if (endAtUtc <= startAtUtc)
         {
@@ -63,15 +100,20 @@ public sealed class SchedulingService
             throw new ArgumentException("Patient id is required.", nameof(patientId));
         }
 
-        var slot = _store.GetSlot(tenantId, slotId)
-            ?? throw new KeyNotFoundException($"Slot '{slotId}' not found for tenant '{tenantId}'.");
+        // Atomic check-and-reserve in the store: closes the race where two
+        // concurrent bookings both saw IsBooked == false and both succeeded.
+        var now = DateTime.UtcNow;
+        var result = _store.TryReserveSlot(tenantId, slotId, now, out var reservedSlot);
 
-        if (slot.IsBooked)
+        switch (result)
         {
-            throw new InvalidOperationException($"Slot '{slotId}' is already booked.");
+            case SlotReservationResult.NotFound:
+                throw new KeyNotFoundException($"Slot '{slotId}' not found for tenant '{tenantId}'.");
+            case SlotReservationResult.AlreadyBooked:
+                throw new InvalidOperationException($"Slot '{slotId}' is already booked.");
         }
 
-        var now = DateTime.UtcNow;
+        var slot = reservedSlot!;
         var appointment = new Appointment
         {
             Id = Guid.NewGuid(),
@@ -88,8 +130,6 @@ public sealed class SchedulingService
         };
 
         _store.AddAppointment(appointment);
-        _store.UpdateSlot(slot with { IsBooked = true, UpdatedAtUtc = now });
-
         return appointment;
     }
 

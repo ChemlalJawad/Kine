@@ -7,11 +7,14 @@ import { listPatients, type Patient } from '../api/patientsApi';
 import {
   bookAppointment,
   cancelAppointment,
+  createPractitioner,
   createSlot,
   listAppointments,
+  listPractitioners,
   listSlots,
   markAppointmentNoShow,
   type Appointment,
+  type Practitioner,
   type PractitionerSlot
 } from '../api/schedulingApi';
 
@@ -70,26 +73,34 @@ export function AgendaPage() {
   const auth = useMemo(() => ({ tenantId, actorId }), [tenantId, actorId]);
 
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [practitioners, setPractitioners] = useState<Practitioner[]>([]);
   const [slots, setSlots] = useState<PractitionerSlot[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [showSlotModal, setShowSlotModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showPractitionerModal, setShowPractitionerModal] = useState(false);
   const [slotDraft, setSlotDraft] = useState<SlotDraft>({ practitionerId: '', startAt: null, endAt: null });
   const [bookingDraft, setBookingDraft] = useState<BookingDraft>({ slotId: '', patientId: '' });
+  const [practitionerDraft, setPractitionerDraft] = useState({ firstName: '', lastName: '', inamiNumber: '' });
+  // F-B2 : filtre agenda par praticien ('' = tous les praticiens).
+  const [practitionerFilter, setPractitionerFilter] = useState('');
 
   const freeSlots = slots.filter((slot) => !slot.isBooked);
 
   const scheduleRows: ScheduleRow[] = useMemo(() => {
-    const sortedSlots = [...slots].sort((a, b) => a.startAtUtc.localeCompare(b.startAtUtc));
+    const visibleSlots = practitionerFilter
+      ? slots.filter((slot) => slot.practitionerId === practitionerFilter)
+      : slots;
+    const sortedSlots = [...visibleSlots].sort((a, b) => a.startAtUtc.localeCompare(b.startAtUtc));
     return sortedSlots.map((slot) => {
       const slotAppointments = appointments
         .filter((appointment) => appointment.slotId === slot.id)
         .sort((a, b) => b.createdAtUtc.localeCompare(a.createdAtUtc));
       return { slot, appointment: slotAppointments[0] ?? null };
     });
-  }, [slots, appointments]);
+  }, [slots, appointments, practitionerFilter]);
 
   // Vue journee (mockup 1b) : creneaux regroupes par jour, en-tete "Mardi 1 juillet 2026".
   const rowsByDay = useMemo(() => {
@@ -107,12 +118,14 @@ export function AgendaPage() {
   }, [scheduleRows]);
 
   const loadAll = async () => {
-    const [loadedPatients, loadedSlots, loadedAppointments] = await Promise.all([
+    const [loadedPatients, loadedPractitioners, loadedSlots, loadedAppointments] = await Promise.all([
       listPatients(auth),
+      listPractitioners(auth),
       listSlots(auth),
       listAppointments(auth)
     ]);
     setPatients(loadedPatients);
+    setPractitioners(loadedPractitioners);
     setSlots(loadedSlots);
     setAppointments(loadedAppointments);
   };
@@ -125,6 +138,30 @@ export function AgendaPage() {
   const patientName = (patientId: string) => {
     const patient = patients.find((item) => item.id === patientId);
     return patient ? `${patient.firstName} ${patient.lastName}` : patientId;
+  };
+
+  const practitionerName = (practitionerId: string) => {
+    const practitioner = practitioners.find((item) => item.id === practitionerId);
+    return practitioner ? `${practitioner.firstName} ${practitioner.lastName}` : practitionerId;
+  };
+
+  const handleCreatePractitioner = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+    try {
+      await createPractitioner(auth, {
+        firstName: practitionerDraft.firstName,
+        lastName: practitionerDraft.lastName,
+        inamiNumber: practitionerDraft.inamiNumber.trim() || null
+      });
+      setPractitionerDraft({ firstName: '', lastName: '', inamiNumber: '' });
+      setShowPractitionerModal(false);
+      await loadAll();
+      setMessage('Praticien ajoute.');
+    } catch (createError) {
+      setError((createError as Error).message);
+    }
   };
 
   const handleCreateSlot = async (event: FormEvent<HTMLFormElement>) => {
@@ -203,6 +240,21 @@ export function AgendaPage() {
             <h3 style={{ margin: '4px 0 0' }}>Planning ({scheduleRows.length} creneaux)</h3>
           </div>
           <div className="toolbar">
+            <select
+              value={practitionerFilter}
+              onChange={(event) => setPractitionerFilter(event.target.value)}
+              aria-label="Filtrer par praticien"
+            >
+              <option value="">Tous les praticiens</option>
+              {practitioners.map((practitioner) => (
+                <option key={practitioner.id} value={practitioner.id}>
+                  {practitioner.firstName} {practitioner.lastName}
+                </option>
+              ))}
+            </select>
+            <button className="ghost-button" type="button" onClick={() => setShowPractitionerModal(true)}>
+              + Praticien
+            </button>
             <button className="ghost-button" type="button" onClick={() => setShowSlotModal(true)}>
               + Nouveau creneau
             </button>
@@ -228,8 +280,8 @@ export function AgendaPage() {
                         <strong>{appointment ? patientName(appointment.patientId) : '—'}</strong>
                         <p className="muted compact">
                           {appointment
-                            ? `${slot.practitionerId} · jusqu'a ${formatTime(slot.endAtUtc)}`
-                            : `Creneau libre · jusqu'a ${formatTime(slot.endAtUtc)}`}
+                            ? `${practitionerName(slot.practitionerId)} · jusqu'a ${formatTime(slot.endAtUtc)}`
+                            : `Creneau libre (${practitionerName(slot.practitionerId)}) · jusqu'a ${formatTime(slot.endAtUtc)}`}
                         </p>
                       </div>
                       <span
@@ -262,10 +314,17 @@ export function AgendaPage() {
             <div className="form-grid">
               <label>
                 Praticien
-                <input
+                <select
                   value={slotDraft.practitionerId}
                   onChange={(event) => setSlotDraft({ ...slotDraft, practitionerId: event.target.value })}
-                />
+                >
+                  <option value="">Selectionner</option>
+                  {practitioners.map((practitioner) => (
+                    <option key={practitioner.id} value={practitioner.id}>
+                      {practitioner.firstName} {practitioner.lastName}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label>
                 Debut
@@ -310,6 +369,43 @@ export function AgendaPage() {
         </Modal>
       ) : null}
 
+      {showPractitionerModal ? (
+        <Modal title="Nouveau praticien" onClose={() => setShowPractitionerModal(false)}>
+          <form className="stack" onSubmit={handleCreatePractitioner}>
+            <div className="form-grid">
+              <label>
+                Prenom
+                <input
+                  value={practitionerDraft.firstName}
+                  onChange={(event) => setPractitionerDraft({ ...practitionerDraft, firstName: event.target.value })}
+                />
+              </label>
+              <label>
+                Nom
+                <input
+                  value={practitionerDraft.lastName}
+                  onChange={(event) => setPractitionerDraft({ ...practitionerDraft, lastName: event.target.value })}
+                />
+              </label>
+              <label>
+                Numero INAMI (optionnel)
+                <input
+                  value={practitionerDraft.inamiNumber}
+                  onChange={(event) => setPractitionerDraft({ ...practitionerDraft, inamiNumber: event.target.value })}
+                />
+              </label>
+            </div>
+            <button
+              className="primary-button is-create"
+              type="submit"
+              disabled={!practitionerDraft.firstName.trim() || !practitionerDraft.lastName.trim()}
+            >
+              Ajouter praticien
+            </button>
+          </form>
+        </Modal>
+      ) : null}
+
       {showBookingModal ? (
         <Modal title="Nouveau rendez-vous" onClose={() => setShowBookingModal(false)}>
           <form className="stack" onSubmit={handleBookAppointment}>
@@ -337,7 +433,7 @@ export function AgendaPage() {
                   <option value="">Selectionner</option>
                   {freeSlots.map((slot) => (
                     <option key={slot.id} value={slot.id}>
-                      {slot.practitionerId} · {formatDay(slot.startAtUtc)} {formatTime(slot.startAtUtc)}
+                      {practitionerName(slot.practitionerId)} · {formatDay(slot.startAtUtc)} {formatTime(slot.startAtUtc)}
                     </option>
                   ))}
                 </select>

@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Kine.Modules.Audit.Application;
 using Kine.Modules.Audit.Domain;
 using Kine.Modules.Audit.Infrastructure;
@@ -85,6 +86,26 @@ public class AuditTrailTests
         var reordered = new[] { chain[1], chain[0] };
 
         Assert.False(AuditChainVerifier.IsValid(reordered));
+    }
+
+    [Fact]
+    public void Record_stays_verifiable_under_concurrent_writes_to_the_same_tenant()
+    {
+        // Regression P0-014: GetChain + Append were not atomic, so two concurrent
+        // Record calls could chain onto the same predecessor (same PrevHash),
+        // permanently breaking verification as a false tampering positive.
+        var store = new InMemoryAuditLogStore();
+        var service = new AuditTrailService(store);
+        const int writers = 50;
+
+        Parallel.For(0, writers, i =>
+            service.Record("tenant-a", $"user-{i}", "create", "patient", $"p-{i}", $"payload-{i}"));
+
+        var chain = store.GetChain("tenant-a");
+
+        Assert.Equal(writers, chain.Count);
+        Assert.True(AuditChainVerifier.IsValid(chain));
+        Assert.Equal(writers, chain.Select(e => e.PrevHash).Distinct().Count());
     }
 
     [Fact]

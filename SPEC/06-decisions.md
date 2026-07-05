@@ -109,3 +109,21 @@ Decisions existantes
 - Alternatives: 1) Suppression physique immediate 2) Attendre resolution Q-B15 avant tout DELETE
 - Impact: Implementation reversible et non bloquante; le comportement pourra etre ajuste une fois Q-B15 tranchee sans casser le contrat API (semantique DELETE inchangee cote appelant)
 - Statut: Accepte
+
+- ID: D-012
+- Date: 2026-07-05
+- Sujet: Cible commerciale Q-INE
+- Decision: Q-INE vise les cabinets de groupe en concurrence frontale avec CGM (Oxygen) et Corilus (KineQuick/CareConnect), plutot qu un positionnement solo/prix bas type Kin'Easy
+- Contexte: Question ouverte de l analyse SPEC/17-opportunites-features.md (section 5); tranchee par l utilisateur le 2026-07-05
+- Alternatives: 1) Solo/duo pricing agressif (~29 EUR/mois) 2) Freemium agenda type Rosa
+- Impact: Priorise multi-praticiens/multi-sites (F-B2), reporting cabinet riche (F-B5), et la trajectoire homologation INAMI + MyCareNet (F-A2/F-A3) comme pre-requis pour convaincre les cabinets etablis chez CGM/Corilus; l import/migration depuis Oxygen et KineQuick devient strategique
+- Statut: Accepte
+
+- ID: D-013
+- Date: 2026-07-05
+- Sujet: Mapping global des exceptions API (P0-016)
+- Decision: Un middleware global ExceptionMappingMiddleware mappe ArgumentException->400, KeyNotFoundException->404, InvalidOperationException->409 avec le corps { error }; les services utilisent KeyNotFoundException pour "introuvable" (PatientService aligne sur les autres modules) et InvalidOperationException est reserve aux conflits d etat
+- Contexte: PatientsEndpoints laissait fuir ArgumentException en 500 et utilisait InvalidOperationException comme "not found", divergent des autres modules
+- Alternatives: 1) try/catch locaux alignes dans chaque endpoint 2) ProblemDetails RFC 7807
+- Impact: Contrat d erreur uniforme pour le frontend; les try/catch locaux des autres modules deviennent redondants (suppression opportuniste possible, comportement identique)
+- Statut: Accepte

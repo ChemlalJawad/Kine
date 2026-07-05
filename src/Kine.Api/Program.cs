@@ -46,6 +46,7 @@ builder.Services.AddSingleton<SchedulingService>();
 builder.Services.AddSingleton<IInvoiceStore, InMemoryInvoiceStore>();
 builder.Services.AddSingleton<BillingService>();
 builder.Services.AddSingleton<ISeanceStore, InMemorySeanceStore>();
+builder.Services.AddSingleton<IPrescriptionStore, InMemoryPrescriptionStore>();
 builder.Services.AddSingleton<ClinicalService>();
 builder.Services.AddSingleton<IReimbursementCaseStore, InMemoryReimbursementCaseStore>();
 builder.Services.AddSingleton<ReimbursementService>();
@@ -71,12 +72,16 @@ DemoDataSeeder.Seed(
     app.Services.GetRequiredService<ISchedulingStore>(),
     app.Services.GetRequiredService<IInvoiceStore>(),
     app.Services.GetRequiredService<ISeanceStore>(),
+    app.Services.GetRequiredService<IPrescriptionStore>(),
     app.Services.GetRequiredService<IReimbursementCaseStore>());
 
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors(LocalDevCorsPolicy);
 
+// Outermost business middleware: maps domain exceptions from every endpoint to
+// 400/404/409 with the shared { error } body (see ExceptionMappingMiddleware).
+app.UseMiddleware<ExceptionMappingMiddleware>();
 app.UseMiddleware<StaffMfaEnforcementMiddleware>();
 app.UseMiddleware<TenantContextMiddleware>();
 app.UseMiddleware<RbacMiddleware>();
